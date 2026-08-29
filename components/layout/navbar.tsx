@@ -9,6 +9,8 @@ import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+import { useCart } from "@/lib/store/cart-context";
+
 const NAV_LINKS = [
   { href: "/shop", label: "Shop Gifts" },
   { href: "/customize", label: "Customize", highlight: true },
@@ -21,9 +23,10 @@ const NAV_LINKS = [
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { itemCount, openCartDrawer } = useCart();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-brand-beige-300/40 bg-brand-cream/90 backdrop-blur-md transition-all">
+    <header className="sticky top-0 z-40 w-full border-b border-brand-beige-300/40 bg-brand-cream/90 backdrop-blur-md transition-all">
       {/* Top Notification Bar */}
       <div className="bg-brand-brown px-4 py-1.5 text-center text-[11px] font-medium tracking-wider text-brand-cream uppercase">
         <span>Handmade with love in Kathmandu, Nepal • Free Valley Delivery over Rs. 3,500</span>
@@ -59,16 +62,18 @@ export function Navbar() {
 
           {/* Right Action Icons (Cart + CTA) */}
           <div className="flex items-center space-x-3">
-            <Link
-              href="/cart"
+            <button
+              onClick={openCartDrawer}
               className="relative flex h-10 w-10 items-center justify-center rounded-full border border-brand-beige-400/50 bg-white/60 text-brand-brown transition-colors hover:bg-brand-cream-200"
-              aria-label="Shopping Cart"
+              aria-label="Shopping Bag"
             >
               <ShoppingBag className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-brown text-[9px] font-bold text-brand-cream">
-                0
-              </span>
-            </Link>
+              {itemCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-pink-500 text-[9px] font-bold text-white shadow-xs">
+                  {itemCount}
+                </span>
+              )}
+            </button>
 
             <Link href="/customize" className="hidden lg:inline-flex">
               <Button variant="primary" size="sm">

@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { CartProvider } from "@/lib/store/cart-context";
+import { CartDrawer } from "@/components/cart/cart-drawer";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -78,9 +80,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${jakarta.variable} scroll-smooth`}>
       <body className="min-h-screen flex flex-col bg-brand-cream text-brand-brown bg-paper-texture antialiased selection:bg-brand-pink-200">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <CartProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );

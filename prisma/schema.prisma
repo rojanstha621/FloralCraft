@@ -1,0 +1,299 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum OrderStatus {
+  PENDING
+  PAYMENT_PENDING
+  PAID
+  CONFIRMED
+  IN_PRODUCTION
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  ESEWA
+  KHALTI
+  FONEPAY
+  CASH_ON_DELIVERY
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum CustomizationType {
+  FRAME_COLOR
+  FLOWER_STYLE
+  BACKGROUND_COLOR
+  PHOTO_UPLOAD
+  TEXT_MESSAGE
+  RECIPIENT_NAME
+  SPECIAL_DATE
+  SIZE
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String
+  role         String    @default("ADMIN")
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model User {
+  id          String      @id @default(cuid())
+  email       String?     @unique
+  phone       String?     @unique
+  name        String?
+  addresses   Address[]
+  orders      Order[]
+  reviews     Review[]
+  cart        Cart?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Address {
+  id           String    @id @default(cuid())
+  userId       String?
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  recipientName String
+  phone        String
+  streetAddress String
+  city         String    @default("Kathmandu")
+  area         String
+  landmark     String?
+  postalCode   String?
+  isDefault    Boolean   @default(false)
+  orders       Order[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model ProductCategory {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  imageUrl    String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Product {
+  id                   String                 @id @default(cuid())
+  name                 String
+  slug                 String                 @unique
+  tagline              String?
+  description          String
+  story                String?
+  basePrice            Float
+  compareAtPrice       Float?
+  isCustomizable       Boolean                @default(true)
+  isFeatured           Boolean                @default(false)
+  isAvailable          Boolean                @default(true)
+  dimensions           String?
+  materials            String?
+  prepTimeDays         Int                    @default(3)
+  categoryId           String
+  category             ProductCategory        @relation(fields: [categoryId], references: [id])
+  images               ProductImage[]
+  customizationOptions CustomizationOption[]
+  cartItems            CartItem[]
+  orderItems           OrderItem[]
+  reviews              Review[]
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+}
+
+model ProductImage {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url         String
+  altText     String?
+  sortOrder   Int      @default(0)
+  isPrimary   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model CustomizationOption {
+  id          String            @id @default(cuid())
+  productId   String
+  product     Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type        CustomizationType
+  label       String
+  description String?
+  isRequired  Boolean           @default(false)
+  extraPrice  Float             @default(0.0)
+  optionsJson String?           // JSON string for selectable variants e.g. ["Pink Rose", "White Lily"]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Cart {
+  id          String     @id @default(cuid())
+  userId      String?    @unique
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId   String?    @unique
+  items       CartItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model CartItem {
+  id                 String   @id @default(cuid())
+  cartId             String
+  cart               Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity           Int      @default(1)
+  unitPrice          Float
+  customizationJson  String?  // JSON serialized customizer choices & uploaded image references
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Order {
+  id                  String               @id @default(cuid())
+  orderNumber         String               @unique
+  userId              String?
+  user                User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName        String
+  customerEmail       String
+  customerPhone       String
+  status              OrderStatus          @default(PENDING)
+  subtotal            Float
+  deliveryFee         Float                @default(0.0)
+  discountAmount      Float                @default(0.0)
+  totalAmount         Float
+  deliveryAddressId   String?
+  deliveryAddress     Address?             @relation(fields: [deliveryAddressId], references: [id], onDelete: SetNull)
+  deliveryAddressJson String?              // Snapshot of address at time of order
+  preferredDate       DateTime?
+  deliveryNotes       String?
+  couponCode          String?
+  coupon              Coupon?              @relation(fields: [couponCode], references: [code], onDelete: SetNull)
+  items               OrderItem[]
+  payments            Payment[]
+  statusHistory       OrderStatusHistory[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model OrderItem {
+  id                 String              @id @default(cuid())
+  orderId            String
+  order              Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId          String?
+  product            Product?            @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName        String
+  unitPrice          Float
+  quantity           Int
+  subtotal           Float
+  customization      OrderCustomization?
+  createdAt          DateTime            @default(now())
+}
+
+model OrderCustomization {
+  id                 String     @id @default(cuid())
+  orderItemId        String     @unique
+  orderItem          OrderItem  @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  frameColor         String?
+  flowerStyle        String?
+  backgroundColor    String?
+  photoUrl           String?
+  messageText        String?
+  recipientName      String?
+  specialDate        String?
+  sizeVariant        String?
+  additionalDetails  String?
+  createdAt          DateTime   @default(now())
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  orderId        String
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount         Float
+  provider       PaymentMethod
+  status         PaymentStatus @default(PENDING)
+  transactionRef String?       @unique
+  providerData   String?       // Response payload from provider
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model OrderStatusHistory {
+  id         String      @id @default(cuid())
+  orderId    String
+  order      Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus   OrderStatus
+  note       String?
+  changedBy  String?     // 'SYSTEM', 'ADMIN', or admin email
+  createdAt  DateTime    @default(now())
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  authorName String
+  rating     Int      @default(5)
+  comment    String
+  imageUrl   String?
+  isVerified Boolean  @default(false)
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  code            String    @unique
+  description     String?
+  discountType    String    @default("PERCENTAGE") // 'PERCENTAGE' or 'FIXED'
+  discountValue   Float
+  minOrderAmount  Float     @default(0.0)
+  maxDiscount     Float?
+  usageLimit      Int?
+  usedCount       Int       @default(0)
+  expiresAt       DateTime?
+  isActive        Boolean   @default(true)
+  orders          Order[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Delivery {
+  id           String   @id @default(cuid())
+  areaName     String   @unique
+  city         String   @default("Kathmandu")
+  fee          Float    @default(100.0)
+  estimatedDays Int     @default(1)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}

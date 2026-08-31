@@ -2,6 +2,7 @@ import { StorageProvider, StorageUploadResult } from "./types";
 import { env } from "@/lib/validation/env";
 import fs from "fs/promises";
 import path from "path";
+import { supabase } from "@/lib/supabase/client";
 
 /**
  * Local file system storage implementation for development
@@ -80,6 +81,81 @@ class CloudinaryStorageProvider implements StorageProvider {
 
   getPublicUrl(key: string): string {
     return `https://res.cloudinary.com/${env.CLOUDINARY_CLOUD_NAME || "demo"}/image/upload/${key}`;
+  }
+}
+
+/**
+ * Supabase Storage Provider for remote image hosting
+ */
+class SupabaseStorageProvider implements StorageProvider {
+  private bucketName = "product-images";
+
+  private async ensureBucket(): Promise<void> {
+    try {
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(b => b.name === this.bucketName);
+      
+      if (!bucketExists) {
+        const { data, error } = await supabase.storage.createBucket(this.bucketName, {
+          public: true,
+          fileSizeLimit: 5 * 1024 * 1024, // 5MB limit
+        });
+        if (error) throw error;
+      }
+    } catch (error) {
+      console.error("Error ensuring Supabase bucket:", error);
+    }
+  }
+
+  async uploadFile(
+    buffer: Buffer,
+    fileName: string,
+    mimeType: string,
+    folder = "products"
+  ): Promise<StorageUploadResult> {
+    await this.ensureBucket();
+
+    const safeName = `${Date.now()}-${fileName.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+    const filePath = `${folder}/${safeName}`;
+
+    const { data, error } = await supabase.storage
+      .from(this.bucketName)
+      .upload(filePath, buffer, {
+        contentType: mimeType,
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrl } = supabase.storage
+      .from(this.bucketName)
+      .getPublicUrl(filePath);
+
+    return {
+      url: publicUrl,
+      key: filePath,
+      size: buffer.length,
+      mimeType,
+      provider: "supabase",
+    };
+  }
+
+  async deleteFile(key: string): Promise<boolean> {
+    try {
+      const { error } = await supabase.storage
+        .from(this.bucketName)
+        .remove([key]);
+      return !error;
+    } catch {
+      return false;
+    }
+  }
+
+  getPublicUrl(key: string): string {
+    const { data } = supabase.storage
+      .from(this.bucketName)
+      .getPublicUrl(key);
+    return data.publicUrl;
   }
 }
 
@@ -196,6 +272,8 @@ export function getStorageProvider(): StorageProvider {
       return new CloudinaryStorageProvider();
     case "external":
       return new ExternalStorageProvider();
+    case "supabase":
+      return new SupabaseStorageProvider();
     case "local":
     default:
       return new LocalStorageProvider();

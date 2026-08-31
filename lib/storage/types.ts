@@ -3,7 +3,7 @@ export interface StorageUploadResult {
   key: string;
   size: number;
   mimeType: string;
-  provider: "local" | "cloudinary" | "s3" | "external";
+  provider: "local" | "cloudinary" | "s3" | "external" | "supabase";
 }
 
 export interface StorageProvider {

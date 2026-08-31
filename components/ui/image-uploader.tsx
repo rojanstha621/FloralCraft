@@ -113,13 +113,24 @@ export function ImageUploader({
     setIsUploading(true);
 
     try {
-      // This would integrate with your existing storage provider
-      // For now, we'll create object URLs for preview
       const newImages: { url: string; alt?: string }[] = [];
       
       for (const file of files) {
-        const objectUrl = URL.createObjectURL(file);
-        newImages.push({ url: objectUrl, alt: file.name });
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("folder", "products");
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Upload failed");
+        }
+
+        const data = await response.json();
+        newImages.push({ url: data.url, alt: file.name });
       }
 
       const updatedImages = [...images, ...newImages];
@@ -127,7 +138,7 @@ export function ImageUploader({
       onImagesChange(updatedImages);
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload images");
+      alert("Failed to upload images. Please try again.");
     } finally {
       setIsUploading(false);
     }

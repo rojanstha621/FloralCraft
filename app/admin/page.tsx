@@ -142,6 +142,24 @@ export default function AdminDashboardPage() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [newProductImages, setNewProductImages] = useState<{ url: string; alt?: string }[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    slug: "",
+    tagline: "",
+    description: "",
+    story: "",
+    basePrice: "",
+    compareAtPrice: "",
+    isCustomizable: true,
+    isFeatured: false,
+    isAvailable: true,
+    dimensions: "",
+    materials: "",
+    prepTimeDays: 3,
+    categoryId: "",
+  });
 
   useEffect(() => {
     // Check for authentication token in localStorage first
@@ -154,10 +172,83 @@ export default function AdminDashboardPage() {
       // Set cookie for middleware validation
       document.cookie = `admin_token=${token}; path=/; max-age=86400`;
       setIsAuthenticated(true);
+      
+      // Load categories
+      fetchCategories();
     }
     
     setIsLoading(false);
   }, [router]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("/api/categories");
+      const data = await response.json();
+      if (data.success) {
+        setCategories(data.categories);
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  const handleCreateProduct = async () => {
+    if (!newProduct.name || !newProduct.slug || !newProduct.description || !newProduct.basePrice || !newProduct.categoryId) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    setIsCreatingProduct(true);
+
+    try {
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...newProduct,
+          images: newProductImages.map((img, index) => ({
+            url: img.url,
+            alt: img.alt,
+            sortOrder: index,
+            isPrimary: index === 0,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert("Product created successfully!");
+        setShowAddProductModal(false);
+        setNewProductImages([]);
+        setNewProduct({
+          name: "",
+          slug: "",
+          tagline: "",
+          description: "",
+          story: "",
+          basePrice: "",
+          compareAtPrice: "",
+          isCustomizable: true,
+          isFeatured: false,
+          isAvailable: true,
+          dimensions: "",
+          materials: "",
+          prepTimeDays: 3,
+          categoryId: "",
+        });
+      } else {
+        alert("Failed to create product: " + data.error);
+      }
+    } catch (error) {
+      console.error("Product creation error:", error);
+      alert("Failed to create product. Please try again.");
+    } finally {
+      setIsCreatingProduct(false);
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("admin_token");
@@ -571,20 +662,36 @@ export default function AdminDashboardPage() {
         {/* Add Product Modal */}
         {showAddProductModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-brown-900/50 backdrop-blur-xs animate-fadeIn">
-            <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-brand-beige-300 bg-white p-6 md:p-8 shadow-2xl space-y-6">
+            <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-brand-beige-300 bg-white p-6 md:p-8 shadow-2xl space-y-6">
               <div className="flex items-center justify-between border-b border-brand-beige-200 pb-3">
                 <div>
                   <h3 className="font-serif font-bold text-lg text-brand-brown">
                     Add New Product
                   </h3>
                   <p className="text-xs text-brand-brown-400">
-                    Add product images from external hosting services
+                    Create a new product with images
                   </p>
                 </div>
                 <button
                   onClick={() => {
                     setShowAddProductModal(false);
                     setNewProductImages([]);
+                    setNewProduct({
+                      name: "",
+                      slug: "",
+                      tagline: "",
+                      description: "",
+                      story: "",
+                      basePrice: "",
+                      compareAtPrice: "",
+                      isCustomizable: true,
+                      isFeatured: false,
+                      isAvailable: true,
+                      dimensions: "",
+                      materials: "",
+                      prepTimeDays: 3,
+                      categoryId: "",
+                    });
                   }}
                   className="rounded-full p-2 text-brand-brown-400 hover:bg-brand-cream-200"
                 >
@@ -593,13 +700,160 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="space-y-4">
+                {/* Basic Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-brand-brown">Product Name *</label>
+                    <Input
+                      value={newProduct.name}
+                      onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                      placeholder="Eternal Rose Frame"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-brand-brown">Slug *</label>
+                    <Input
+                      value={newProduct.slug}
+                      onChange={(e) => setNewProduct({...newProduct, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
+                      placeholder="eternal-rose-frame"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-brand-brown">Tagline</label>
+                  <Input
+                    value={newProduct.tagline}
+                    onChange={(e) => setNewProduct({...newProduct, tagline: e.target.value})}
+                    placeholder="Forever preserved in time"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-brand-brown">Description *</label>
+                  <textarea
+                    value={newProduct.description}
+                    onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                    placeholder="Product description..."
+                    className="w-full rounded-2xl border border-brand-beige-400/60 bg-white px-4 py-3 text-sm text-brand-brown min-h-[100px]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-brand-brown">Story</label>
+                  <textarea
+                    value={newProduct.story}
+                    onChange={(e) => setNewProduct({...newProduct, story: e.target.value})}
+                    placeholder="Product story..."
+                    className="w-full rounded-2xl border border-brand-beige-400/60 bg-white px-4 py-3 text-sm text-brand-brown min-h-[80px]"
+                  />
+                </div>
+
+                {/* Pricing */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-brand-brown">Base Price (Rs.) *</label>
+                    <Input
+                      type="number"
+                      value={newProduct.basePrice}
+                      onChange={(e) => setNewProduct({...newProduct, basePrice: e.target.value})}
+                      placeholder="2499"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-brand-brown">Compare At Price (Rs.)</label>
+                    <Input
+                      type="number"
+                      value={newProduct.compareAtPrice}
+                      onChange={(e) => setNewProduct({...newProduct, compareAtPrice: e.target.value})}
+                      placeholder="2999"
+                    />
+                  </div>
+                </div>
+
+                {/* Category */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-brand-brown">Category *</label>
+                  <select
+                    value={newProduct.categoryId}
+                    onChange={(e) => setNewProduct({...newProduct, categoryId: e.target.value})}
+                    className="w-full rounded-2xl border border-brand-beige-400/60 bg-white px-4 py-3 text-sm text-brand-brown"
+                  >
+                    <option value="">Select a category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Product Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-brand-brown">Dimensions</label>
+                    <Input
+                      value={newProduct.dimensions}
+                      onChange={(e) => setNewProduct({...newProduct, dimensions: e.target.value})}
+                      placeholder="30cm x 40cm"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-brand-brown">Materials</label>
+                    <Input
+                      value={newProduct.materials}
+                      onChange={(e) => setNewProduct({...newProduct, materials: e.target.value})}
+                      placeholder="Pressed roses, museum glass"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-brand-brown">Preparation Time (Days)</label>
+                  <Input
+                    type="number"
+                    value={newProduct.prepTimeDays}
+                    onChange={(e) => setNewProduct({...newProduct, prepTimeDays: parseInt(e.target.value)})}
+                    placeholder="3"
+                  />
+                </div>
+
+                {/* Toggles */}
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 text-sm text-brand-brown">
+                    <input
+                      type="checkbox"
+                      checked={newProduct.isCustomizable}
+                      onChange={(e) => setNewProduct({...newProduct, isCustomizable: e.target.checked})}
+                    />
+                    Customizable
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-brand-brown">
+                    <input
+                      type="checkbox"
+                      checked={newProduct.isFeatured}
+                      onChange={(e) => setNewProduct({...newProduct, isFeatured: e.target.checked})}
+                    />
+                    Featured
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-brand-brown">
+                    <input
+                      type="checkbox"
+                      checked={newProduct.isAvailable}
+                      onChange={(e) => setNewProduct({...newProduct, isAvailable: e.target.checked})}
+                    />
+                    Available
+                  </label>
+                </div>
+
+                {/* Image Upload */}
                 <div>
                   <h4 className="font-semibold text-sm text-brand-brown mb-3">Product Images</h4>
                   <ImageUploader
                     onImagesChange={setNewProductImages}
                     initialImages={newProductImages}
                     maxImages={5}
-                    allowExternal={true}
+                    allowExternal={false}
                   />
                 </div>
 
@@ -608,11 +862,11 @@ export default function AdminDashboardPage() {
                     <div className="flex items-center gap-2 text-green-800">
                       <Check className="h-5 w-5" />
                       <span className="font-semibold text-sm">
-                        {newProductImages.length} image(s) ready to add
+                        {newProductImages.length} image(s) uploaded to Supabase Storage
                       </span>
                     </div>
                     <p className="text-xs text-green-700 mt-1">
-                      These images will be saved with your product. URLs from free hosting services like ImgLink, im.ge, or 8upload work perfectly.
+                      Images are stored securely in your Supabase Storage bucket.
                     </p>
                   </div>
                 )}
@@ -623,22 +877,32 @@ export default function AdminDashboardPage() {
                     onClick={() => {
                       setShowAddProductModal(false);
                       setNewProductImages([]);
+                      setNewProduct({
+                        name: "",
+                        slug: "",
+                        tagline: "",
+                        description: "",
+                        story: "",
+                        basePrice: "",
+                        compareAtPrice: "",
+                        isCustomizable: true,
+                        isFeatured: false,
+                        isAvailable: true,
+                        dimensions: "",
+                        materials: "",
+                        prepTimeDays: 3,
+                        categoryId: "",
+                      });
                     }}
                   >
                     Cancel
                   </Button>
                   <Button
                     variant="primary"
-                    disabled={newProductImages.length === 0}
-                    onClick={() => {
-                      // Here you would typically save the product with images
-                      console.log("Product images:", newProductImages);
-                      alert("Product images added! (In production, this would save to database)");
-                      setShowAddProductModal(false);
-                      setNewProductImages([]);
-                    }}
+                    disabled={isCreatingProduct}
+                    onClick={handleCreateProduct}
                   >
-                    Add Product
+                    {isCreatingProduct ? "Creating..." : "Create Product"}
                   </Button>
                 </div>
               </div>

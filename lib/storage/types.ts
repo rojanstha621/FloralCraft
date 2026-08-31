@@ -3,7 +3,7 @@ export interface StorageUploadResult {
   key: string;
   size: number;
   mimeType: string;
-  provider: "local" | "cloudinary" | "s3";
+  provider: "local" | "cloudinary" | "s3" | "external";
 }
 
 export interface StorageProvider {
@@ -13,6 +13,7 @@ export interface StorageProvider {
     mimeType: string,
     folder?: string
   ): Promise<StorageUploadResult>;
+  uploadFromUrl?(url: string, fileName?: string): Promise<StorageUploadResult>;
   deleteFile(key: string): Promise<boolean>;
   getPublicUrl(key: string): string;
 }

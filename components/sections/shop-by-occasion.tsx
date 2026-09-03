@@ -12,7 +12,7 @@ export const OCCASIONS = [
     title: "Birthdays",
     subtitle: "Vibrant botanical memories for their special day",
     imageUrl:
-      "https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=800&auto=format&fit=crop",
     href: "/collections",
   },
   {
@@ -33,7 +33,7 @@ export const OCCASIONS = [
     title: "Dear Parents",
     subtitle: "Warm expressions of gratitude for Mom & Dad",
     imageUrl:
-      "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=800&auto=format&fit=crop",
     href: "/collections",
   },
   {
@@ -47,7 +47,7 @@ export const OCCASIONS = [
     title: "Special Moments",
     subtitle: "Farewells, graduations, and just-because surprises",
     imageUrl:
-      "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop",
     href: "/collections",
   },
 ];
@@ -56,8 +56,10 @@ export function ShopByOccasion() {
   return (
     <section className="bg-[#faf7f1] py-24 sm:py-28">
       <Container size="xl">
-        <div className="mb-14 space-y-4 text-center">
-          <Badge variant="sage">Tailored Gifting</Badge>
+        <div className="mb-14 space-y-4 text-center" data-reveal="up">
+          <Badge variant="sage" className="home-eyebrow">
+            Tailored Gifting
+          </Badge>
           <Heading as="h2" size="2xl">
             A keepsake for every kind of love.
           </Heading>
@@ -68,11 +70,12 @@ export function ShopByOccasion() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {OCCASIONS.map((occasion) => (
+          {OCCASIONS.map((occasion, index) => (
             <Link
               key={occasion.title}
               href={occasion.href}
-              className="group relative flex h-80 flex-col justify-end overflow-hidden rounded-[2rem] border border-white/70 p-6 shadow-[0_28px_60px_-42px_rgba(61,39,30,.6)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_35px_70px_-38px_rgba(61,39,30,.55)]"
+              data-reveal="up"
+              className={`occasion-editorial group relative flex h-80 flex-col justify-end overflow-hidden border border-white/70 p-6 shadow-[0_28px_60px_-42px_rgba(61,39,30,.6)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_35px_70px_-38px_rgba(61,39,30,.55)] reveal-delay-${(index % 3) + 1}`}
             >
               {/* Background Image */}
               <Image

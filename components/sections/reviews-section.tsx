@@ -27,22 +27,25 @@ export function ReviewsSection() {
   if (!reviews.length) return null;
 
   return (
-    <section className="bg-[#faf7f1] py-24 sm:py-28">
+    <section className="home-reviews bg-[#faf7f1] py-24 sm:py-28">
       <Container size="xl">
-        <div className="mb-12 space-y-3 text-center">
-          <Badge variant="sage">Heartfelt words</Badge>
+        <div className="mb-12 space-y-3 text-center" data-reveal="up">
+          <Badge variant="sage" className="home-eyebrow">
+            Notes we keep
+          </Badge>
           <Heading as="h2" size="2xl">
-            Love notes from our customers.
+            The moment after it is opened.
           </Heading>
           <Text size="sm" variant="muted" className="mx-auto max-w-md">
-            Approved stories from people who chose Petal Craft for someone special.
+            A few words from people who trusted us with birthdays, milestones, and memories.
           </Text>
         </div>
         <div className="grid gap-6 md:grid-cols-3">
-          {reviews.map((review) => (
+          {reviews.map((review, index) => (
             <article
               key={review.id}
-              className="relative rounded-[2rem] border border-brand-brown/10 bg-white p-8 shadow-[0_28px_60px_-45px_rgba(61,39,30,.7)] transition duration-500 hover:-translate-y-2"
+              data-reveal="up"
+              className={`review-editorial relative border-y border-brand-brown/15 bg-transparent px-5 py-8 transition duration-500 reveal-delay-${index + 1}`}
             >
               <Quote className="absolute right-6 top-6 h-7 w-7 text-brand-pink-200" />
               <div className="flex text-amber-500">
@@ -63,7 +66,7 @@ export function ReviewsSection() {
             </article>
           ))}
         </div>
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center" data-reveal="up">
           <Link
             href="/reviews"
             className="inline-flex min-h-11 items-center text-sm font-semibold underline underline-offset-4"

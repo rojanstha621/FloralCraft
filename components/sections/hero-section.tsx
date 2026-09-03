@@ -4,11 +4,22 @@ import { ArrowDown, ArrowUpRight, Flower2, Gem, Heart, MapPin, Sparkles } from "
 import { Container } from "@/components/ui/container";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { HeroBotanicalLayer } from "@/components/home/hero-botanical-layer";
 
 const DETAILS = [
-  { icon: Flower2, value: "Real botanicals", label: "Naturally preserved" },
-  { icon: Gem, value: "Made for you", label: "Personalised by hand" },
-  { icon: MapPin, value: "Kathmandu", label: "Local studio & delivery" },
+  { icon: Flower2, value: "Real botanicals", label: "Chosen and preserved with care" },
+  { icon: Gem, value: "One at a time", label: "Composed personally by hand" },
+  { icon: MapPin, value: "Made in Kathmandu", label: "Thoughtfully wrapped and delivered" },
+];
+
+const PRODUCT_FORMS = [
+  "Bouquets",
+  "Bottles",
+  "Pots",
+  "Shadow boxes",
+  "Frames",
+  "Keepsakes",
+  "Custom work",
 ];
 
 export function HeroSection() {
@@ -17,18 +28,19 @@ export function HeroSection() {
       <div className="hero-grain absolute inset-0 -z-10" />
       <div className="hero-orb hero-orb-one" />
       <div className="hero-orb hero-orb-two" />
+      <HeroBotanicalLayer />
 
       <Container size="xl" className="relative pb-8 pt-12 sm:pt-16 lg:pb-10 lg:pt-20">
-        <div className="grid min-h-[720px] items-center gap-14 lg:grid-cols-[1.02fr_.98fr] lg:gap-12">
-          <div className="relative z-10 text-center lg:text-left">
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-brand-brown/15 bg-white/55 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-brown-700 shadow-[0_8px_30px_rgba(74,49,39,.07)] backdrop-blur-xl">
+        <div className="grid min-h-[720px] items-center gap-14 lg:grid-cols-[.96fr_1.04fr] lg:gap-10">
+          <div className="hero-copy relative z-10 text-center lg:text-left">
+            <div className="hero-studio-line mb-8 inline-flex items-center gap-2 border-y border-brand-brown/15 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-brown-700">
               <Sparkles className="h-3.5 w-3.5 text-brand-pink-600" />
               Preserved by hand in Kathmandu
             </div>
 
-            <h1 className="max-w-3xl font-serif text-[clamp(3.65rem,8vw,7.5rem)] font-medium leading-[.82] tracking-[-.055em] text-brand-brown-900">
+            <h1 className="max-w-3xl font-serif text-[clamp(3.05rem,14vw,4.75rem)] font-medium leading-[.9] tracking-[-.05em] text-brand-brown-900 lg:text-[clamp(4.75rem,6.2vw,6.25rem)]">
               Flowers fade.
-              <span className="mt-3 block font-light italic text-brand-pink-700">
+              <span className="mt-2 block font-light italic text-brand-pink-700 lg:whitespace-nowrap">
                 Feelings don&apos;t.
               </span>
             </h1>
@@ -82,8 +94,14 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[570px] lg:mx-0 lg:ml-auto">
-            <div className="hero-image-shell relative ml-auto aspect-[4/5] w-[90%] overflow-hidden rounded-[2.6rem] border border-white/70 bg-brand-cream-200 shadow-[0_45px_100px_-35px_rgba(61,39,30,.42)] sm:w-[86%]">
+          <div
+            className="hero-visual relative mx-auto w-full max-w-[630px] lg:mx-0 lg:ml-auto"
+            data-parallax="14"
+          >
+            <span className="hero-vertical-mark" aria-hidden="true">
+              Petal Craft · Est. Kathmandu
+            </span>
+            <div className="hero-image-shell relative ml-auto aspect-[5/4] w-[94%] overflow-hidden border border-white/70 bg-brand-cream-200 shadow-[0_45px_100px_-35px_rgba(61,39,30,.42)] sm:aspect-[4/5] sm:w-[91%]">
               <Image
                 src="/images/petal-craft-hero-editorial.png"
                 alt="Preserved blush flowers displayed in a glass cloche and handmade paper frame"
@@ -93,23 +111,20 @@ export function HeroSection() {
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-brown-900/10 via-transparent to-white/5" />
-              <div className="absolute inset-x-6 bottom-6 flex items-end justify-between text-white">
-                <div className="rounded-2xl border border-white/35 bg-brand-brown-900/20 px-4 py-3 backdrop-blur-lg">
+              <div className="absolute inset-x-6 bottom-6 flex items-end text-white">
+                <div className="hero-photo-caption border-l border-white/60 bg-brand-brown-900/20 px-4 py-2 backdrop-blur-sm">
                   <p className="text-[9px] font-bold uppercase tracking-[.22em] text-white/75">
                     The forever edit
                   </p>
                   <p className="mt-1 font-serif text-xl">Memory, held in bloom.</p>
                 </div>
-                <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/20 backdrop-blur-lg">
-                  <ArrowUpRight className="h-4 w-4" />
-                </span>
               </div>
             </div>
 
-            <div className="hero-float-card absolute -left-1 top-[14%] rounded-2xl border border-white/70 bg-[#fffaf4]/80 p-3 pr-5 shadow-[0_24px_50px_-18px_rgba(57,37,29,.35)] backdrop-blur-xl sm:-left-4">
+            <div className="hero-float-card hero-paper-note absolute -left-1 top-[14%] hidden border border-brand-brown/10 bg-[#fffaf4] p-2.5 pr-4 shadow-[0_18px_38px_-20px_rgba(57,37,29,.25)] sm:-left-2 sm:block">
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-pink-100 shadow-inner">
-                  <Flower2 className="h-5 w-5 text-brand-pink-700" />
+                <span className="flex h-8 w-8 items-center justify-center border border-brand-pink-200/70 bg-brand-pink-50">
+                  <Flower2 className="h-4 w-4 text-brand-pink-700" />
                 </span>
                 <span className="text-[10px] font-medium leading-4 text-brand-brown-500">
                   <strong className="block font-serif text-base font-semibold text-brand-brown-800">
@@ -120,24 +135,28 @@ export function HeroSection() {
               </div>
             </div>
 
-            <div className="hero-float-card-delayed absolute -bottom-4 right-0 max-w-[190px] rotate-2 rounded-[1.4rem] border border-white/75 bg-brand-sage-800 p-4 text-brand-cream shadow-[0_24px_50px_-18px_rgba(57,37,29,.45)] sm:-right-3 sm:bottom-10">
-              <Sparkles className="mb-3 h-4 w-4 text-brand-pink-200" />
-              <p className="font-serif text-lg leading-5">Real flowers. A feeling that lasts.</p>
+            <div className="hero-float-card-delayed hero-ribbon-note absolute right-0 hidden max-w-[164px] rotate-1 border border-white/25 bg-brand-sage-800 p-3.5 text-brand-cream shadow-[0_18px_38px_-22px_rgba(57,37,29,.35)] sm:-right-2 sm:bottom-10 sm:block">
+              <Sparkles className="mb-2 h-3.5 w-3.5 text-brand-pink-200" />
+              <p className="font-serif text-base leading-5">Real flowers. A feeling that lasts.</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-14 grid overflow-hidden rounded-[1.75rem] border border-brand-brown/10 bg-white/45 shadow-[0_22px_60px_-42px_rgba(61,39,30,.5)] backdrop-blur-xl sm:grid-cols-3 lg:mt-20">
+        <div className="hero-details relative mt-14 grid border-y border-brand-brown/15 pt-5 sm:grid-cols-3 lg:mt-20">
+          <span className="hero-details-label absolute left-0 top-0 -translate-y-1/2 bg-[#f5ede4] pr-4 text-[8px] font-bold uppercase tracking-[.24em] text-brand-brown-500">
+            The Petal Craft signature
+          </span>
           {DETAILS.map(({ icon: Icon, value, label }, index) => (
             <div
               key={value}
-              className={`flex items-center justify-center gap-4 px-6 py-5 text-left sm:justify-start ${index ? "border-t border-brand-brown/10 sm:border-l sm:border-t-0" : ""}`}
+              className={`hero-detail flex items-start gap-3 px-4 py-5 text-left sm:px-6 ${index ? "border-t border-brand-brown/10 sm:border-l sm:border-t-0" : ""}`}
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-cream shadow-[inset_0_1px_0_white,0_7px_18px_rgba(74,49,39,.08)]">
-                <Icon className="h-[18px] w-[18px] text-brand-sage-700" />
+              <span className="hero-detail-number" aria-hidden="true">
+                0{index + 1}
               </span>
+              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-brand-sage-700" aria-hidden="true" />
               <p className="text-xs leading-5 text-brand-brown-500">
-                <strong className="block font-serif text-lg font-semibold text-brand-brown-800">
+                <strong className="block font-serif text-base font-semibold text-brand-brown-800">
                   {value}
                 </strong>
                 {label}
@@ -148,9 +167,20 @@ export function HeroSection() {
 
         <Link
           href="#featured"
-          className="mx-auto mt-8 flex w-fit items-center gap-2 text-[10px] font-semibold uppercase tracking-[.2em] text-brand-brown-500"
+          className="hero-collection-bridge group mt-6 grid gap-4 py-6 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-8"
         >
-          Discover more <ArrowDown className="h-3.5 w-3.5 animate-bounce" />
+          <span className="text-[9px] font-bold uppercase tracking-[.22em] text-brand-pink-700">
+            From the atelier
+          </span>
+          <span className="flex flex-wrap gap-x-3 gap-y-1 font-serif text-sm italic text-brand-brown-600 sm:justify-center">
+            {PRODUCT_FORMS.map((form) => (
+              <span key={form}>{form}</span>
+            ))}
+          </span>
+          <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[.2em] text-brand-brown-600">
+            See the collection
+            <ArrowDown className="h-3.5 w-3.5 transition-transform duration-500 group-hover:translate-y-1" />
+          </span>
         </Link>
       </Container>
     </section>

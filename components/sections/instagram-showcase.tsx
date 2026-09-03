@@ -9,18 +9,21 @@ import { SOCIAL_CONTENT } from "@/lib/data/social";
 
 export function InstagramShowcase() {
   return (
-    <section className="bg-[#f1e9df] py-24 sm:py-28">
+    <section className="home-instagram bg-[#f1e9df] py-24 sm:py-28">
       <Container size="xl">
-        <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+        <div
+          className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end"
+          data-reveal="up"
+        >
           <div className="space-y-3">
-            <Badge variant="pink" className="gap-1">
+            <Badge variant="pink" className="home-eyebrow gap-1">
               <Instagram className="h-3 w-3" /> @petalcraftflorals
             </Badge>
             <Heading as="h2" size="2xl" className="text-brand-brown-900">
               From the studio, with love.
             </Heading>
             <Text size="sm" variant="muted" className="max-w-lg">
-              Studio moments, new pieces, packing rituals, and the stories behind our handmade work.
+              Worktables, petal details, new commissions, and the quiet rituals behind each piece.
             </Text>
           </div>
           <div className="flex gap-3">
@@ -28,7 +31,7 @@ export function InstagramShowcase() {
               href={BUSINESS.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border bg-white px-5 text-xs font-semibold"
+              className="inline-flex min-h-11 items-center gap-2 border-b border-brand-brown/25 text-xs font-semibold"
             >
               <Instagram className="h-4 w-4" /> Instagram
             </a>
@@ -36,7 +39,7 @@ export function InstagramShowcase() {
               href={BUSINESS.tiktokUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center rounded-full border bg-white px-5 text-xs font-semibold"
+              className="inline-flex min-h-11 items-center border-b border-brand-brown/25 text-xs font-semibold"
             >
               TikTok
             </a>
@@ -64,13 +67,14 @@ export function InstagramShowcase() {
           ))}
         </div>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">
-          {SOCIAL_CONTENT.map((item) => (
+          {SOCIAL_CONTENT.map((item, index) => (
             <a
               key={item.id}
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/70 bg-brand-cream-200 shadow-[0_25px_55px_-38px_rgba(61,39,30,.7)] transition duration-500 hover:-translate-y-2"
+              data-reveal="up"
+              className={`social-editorial group relative aspect-[4/5] overflow-hidden border border-white/70 bg-brand-cream-200 shadow-[0_25px_55px_-38px_rgba(61,39,30,.7)] transition duration-500 hover:-translate-y-2 reveal-delay-${(index % 4) + 1}`}
             >
               <Image
                 src={item.imageUrl}

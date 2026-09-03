@@ -9,8 +9,10 @@ export function WhyPetalCraft() {
   return (
     <section className="bg-[#efe5dc] py-24 sm:py-28">
       <Container size="xl">
-        <div className="mb-14 space-y-4 text-center">
-          <Badge variant="pink">The Petal Craft Standard</Badge>
+        <div className="mb-14 space-y-4 text-center" data-reveal="up">
+          <Badge variant="pink" className="home-eyebrow">
+            The Petal Craft Standard
+          </Badge>
           <Heading as="h2" size="2xl">
             Beauty in every last detail.
           </Heading>
@@ -21,7 +23,10 @@ export function WhyPetalCraft() {
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
+          <div
+            data-reveal="up"
+            className="principle-card reveal-delay-1 flex flex-col items-start gap-3 border border-white/80 bg-white/45 p-8 text-left"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-pink-100 text-brand-brown">
               <Flower2 className="h-6 w-6 text-brand-brown" />
             </div>
@@ -34,7 +39,10 @@ export function WhyPetalCraft() {
             </Text>
           </div>
 
-          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
+          <div
+            data-reveal="up"
+            className="principle-card reveal-delay-2 flex flex-col items-start gap-3 border border-white/80 bg-white/45 p-8 text-left"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-sage-100 text-brand-brown">
               <Sparkles className="h-6 w-6 text-brand-sage-800" />
             </div>
@@ -47,7 +55,10 @@ export function WhyPetalCraft() {
             </Text>
           </div>
 
-          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
+          <div
+            data-reveal="up"
+            className="principle-card reveal-delay-3 flex flex-col items-start gap-3 border border-white/80 bg-white/45 p-8 text-left"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-beige-200 text-brand-brown">
               <PackageCheck className="h-6 w-6 text-brand-brown" />
             </div>
@@ -60,7 +71,10 @@ export function WhyPetalCraft() {
             </Text>
           </div>
 
-          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
+          <div
+            data-reveal="up"
+            className="principle-card reveal-delay-4 flex flex-col items-start gap-3 border border-white/80 bg-white/45 p-8 text-left"
+          >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-pink-50 text-brand-brown">
               <MapPin className="h-6 w-6 text-brand-pink-600" />
             </div>

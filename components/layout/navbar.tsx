@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, MessageCircle } from "lucide-react";
@@ -21,17 +21,55 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const isHome = pathname === "/";
+
+  useEffect(() => {
+    if (!isHome) return;
+    const update = () => setScrolled(window.scrollY > 48);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [isHome]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-brand-brown/10 bg-[#faf6ef]/80 shadow-[0_10px_40px_rgba(62,39,30,.04)] backdrop-blur-xl transition-all">
+    <header
+      className={cn(
+        "sticky top-0 z-40 w-full border-b border-brand-brown/10 transition-[background-color,box-shadow] duration-500",
+        isHome
+          ? scrolled
+            ? "bg-[#faf6ef]/95 shadow-[0_12px_35px_rgba(62,39,30,.07)] backdrop-blur-xl"
+            : "bg-[#faf6ef]/95 shadow-none"
+          : "bg-[#faf6ef]/80 shadow-[0_10px_40px_rgba(62,39,30,.04)] backdrop-blur-xl"
+      )}
+    >
       {/* Top Notification Bar */}
-      <div className="bg-brand-brown-900 px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-[.22em] text-brand-cream">
-        <span>Complimentary message card with every keepsake · Handmade in Kathmandu</span>
+      <div
+        className={cn(
+          "overflow-hidden bg-brand-brown-900 px-4 text-center text-[9px] font-semibold uppercase tracking-[.22em] text-brand-cream transition-[max-height,padding] duration-500",
+          isHome && scrolled ? "max-h-0 py-0" : "max-h-10 py-2"
+        )}
+      >
+        <span>Handmade in Kathmandu · Complimentary message card</span>
       </div>
 
       <Container size="xl">
-        <div className="flex h-[76px] items-center justify-between">
+        <div
+          className={cn(
+            "flex items-center justify-between transition-[height] duration-500",
+            isHome && scrolled ? "h-16" : "h-[76px]"
+          )}
+        >
           {/* Brand Logo */}
           <div className="flex items-center">
             <Logo variant="horizontal" size="md" />
@@ -84,9 +122,18 @@ export function Navbar() {
       </Container>
 
       {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="animate-fadeIn border-b border-brand-beige-300 bg-brand-cream px-6 py-6 md:hidden">
-          <nav className="flex flex-col space-y-4">
+      <div
+        className={cn(
+          "grid border-b bg-brand-cream transition-[grid-template-rows,opacity,border-color] duration-500 md:hidden",
+          mobileMenuOpen
+            ? "pointer-events-auto grid-rows-[1fr] border-brand-beige-300 opacity-100"
+            : "pointer-events-none grid-rows-[0fr] border-transparent opacity-0"
+        )}
+        aria-hidden={!mobileMenuOpen}
+        inert={!mobileMenuOpen}
+      >
+        <div className="overflow-hidden">
+          <nav className="flex flex-col space-y-4 px-6 py-6">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
@@ -111,7 +158,7 @@ export function Navbar() {
             </div>
           </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 }

@@ -9,7 +9,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center py-16">
       <Container size="sm">
-        <div className="rounded-3xl border border-brand-beige-300 bg-white/80 p-8 md:p-12 text-center space-y-5 shadow-card">
+        <div className="space-y-5 rounded-3xl border border-brand-beige-300 bg-white/80 p-8 text-center shadow-card md:p-12">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-pink-100 text-brand-pink-600">
             <Flower2 className="h-8 w-8" />
           </div>
@@ -17,8 +17,9 @@ export default function NotFound() {
           <Heading as="h1" size="xl">
             This petal seems to have drifted away
           </Heading>
-          <Text size="sm" variant="muted" className="max-w-md mx-auto">
-            The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+          <Text size="sm" variant="muted" className="mx-auto max-w-md">
+            The page you are looking for might have been removed, had its name changed, or is
+            temporarily unavailable.
           </Text>
           <div className="pt-3">
             <Link href="/">

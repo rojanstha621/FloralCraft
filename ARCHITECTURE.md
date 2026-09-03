@@ -1,58 +1,48 @@
-# Architecture & Technical Design Document
+# Architecture
 
-## 1. Executive Summary
+Petal Craft Florals is a content-led storefront with a lightweight request-management back office. It deliberately avoids checkout/payment complexity while retaining the information the studio needs to fulfill custom work.
 
-**Petal Craft Florals** is a bespoke e-commerce platform built for a handmade floral gifting brand headquartered in Kathmandu, Nepal. The platform couples an emotional, high-aesthetic storefront with mobile-first usability and selective 3D interactive experiences.
-
----
-
-## 2. Core Architectural Pillars
-
-```
-+-----------------------------------------------------------------------+
-|                             Next.js 15 App Router                     |
-+-----------------------------------------------------------------------+
-|  Storefront Routes (/)  |  Customizer (/customize)  |  Admin (/admin) |
-+-----------------------------------------------------------------------+
-|       React Three Fiber / 3D Canvas Layer with Static Fallback        |
-+-----------------------------------------------------------------------+
-|     Design System (Tailwind Tokens: Cream, Brown, Pink, Sage, Beige)   |
-+-----------------------------------------------------------------------+
-|   Payment Abstraction   |    Storage Abstraction   | Analytics Tracker|
-|  (eSewa/Khalti/COD)     |   (Local/Cloudinary/S3)  | (GA4/Pixel/Logs) |
-+-----------------------------------------------------------------------+
-|                 Prisma ORM & PostgreSQL Database Layer                |
-+-----------------------------------------------------------------------+
+```text
+Next.js App Router
+├─ Customer site
+│  ├─ Products, categories, reviews
+│  ├─ Ordering and customization requests
+│  ├─ WhatsApp, contact, and Instagram
+│  └─ Lightweight, lazy homepage WebGL enhancement
+├─ Protected admin panel
+│  ├─ Products, categories, and customization
+│  ├─ Review moderation and order workflow
+│  └─ Business settings
+├─ Prisma → PostgreSQL
+└─ Cloud media storage (Supabase Storage-compatible)
 ```
 
-### Key Highlights:
-1. **Separation of Concerns**: Core domain logic (payments, storage, analytics) is encapsulated behind clean interfaces (`lib/payments`, `lib/storage`, `lib/analytics`) rather than hardcoded.
-2. **Mobile-First Luxury Experience**: Viewport breakpoints and touch targets are specifically tuned for 360px–430px mobile viewports common on social referral platforms.
-3. **Resilient 3D Pipeline**: Three.js canvases are lazy-loaded with explicit WebGL feature detection and static high-fidelity fallbacks. If WebGL fails, the UI falls back seamlessly to static photography.
-4. **Localization**: Built-in support for Nepalese Rupee (`Rs.`), Kathmandu Valley delivery logistics, and domestic payment providers.
+## Data
 
----
+The maintained Prisma surface includes:
 
-## 3. Database Schema Overview (Prisma)
+- `AdminUser`
+- `Category`
+- `ProductType`
+- `Product`
+- `ProductImage`
+- `CustomizationOption`
+- `Review`
+- `OrderRequest` and `OrderRequestItem`
+- `BusinessSettings`
 
-The database models 17 core entities:
-- **`AdminUser`**: Role-based access for dashboard managers.
-- **`User` & `Address`**: Customer profiles and multi-address management with Kathmandu defaults.
-- **`Product` & `ProductCategory`**: Product catalog with dynamic categorization (Forever Bloom, Our Story, Dear Mom, With Gratitude, Memory Lane, Made For You).
-- **`ProductImage`**: Multi-image asset management.
-- **`CustomizationOption`**: Modular schema for customizable attributes (frames, flower styles, backgrounds, photo uploads, text messages).
-- **`Cart` & `CartItem`**: Persistent customer carts with serialization of customizer choices.
-- **`Order`, `OrderItem`, `OrderCustomization`**: Immutable order records preserving customer customizations and photo uploads.
-- **`Payment`**: Multi-provider payment logs tracking transaction references and status.
-- **`OrderStatusHistory`**: Complete audit trail for order state transitions (Pending -> Paid -> In Production -> Ready -> Out For Delivery -> Delivered).
-- **`Review`**: Customer ratings with administrative moderation before publication.
-- **`Coupon` & `Delivery`**: Flexible promotions and district/area-based delivery fee calculations.
+Catalog APIs are read-only. Review and order-request creation are the only public database writes. New reviews are pending by default and never appear publicly until moderated. Order items retain product-name and price snapshots so historical requests survive future catalog changes.
 
----
+## Security and media
 
-## 4. 3D & Performance Strategy
+Admin sessions are signed, HTTP-only cookies and every admin mutation rechecks the active admin account. Cloud storage service credentials are server-only. The database stores public URLs plus provider/storage keys, allowing media to move between providers without changing the product model.
 
-1. **R3F Code Splitting**: All Three.js and `@react-three/fiber` scenes are loaded via Next.js `dynamic()` imports with `ssr: false`.
-2. **Reduced Motion**: All animations and floating camera parallax listen to `prefers-reduced-motion: reduce`.
-3. **Image Optimization**: WebP and AVIF formats with responsive srcset generation via Next.js Image optimization pipeline.
-4. **Asset Compression**: Textures and 3D geometries are compressed and loaded on-demand.
+## Configuration
+
+Business contact and social values live in `lib/config/business.ts`. The WhatsApp number can be overridden with `NEXT_PUBLIC_WHATSAPP_NUMBER` and must not be repeated in components.
+
+Manual social content lives in `lib/data/social.ts`. It is explicitly not a scraped or simulated live Instagram feed, and its typed shape can later be populated through an official API.
+
+## Three.js
+
+Three.js is limited to the homepage hero. It is dynamically loaded, detects WebGL, respects reduced motion, uses bounded pixel density, and has a static fallback.

@@ -35,17 +35,9 @@ function FlowerBlossom({
         const x = Math.cos(angle) * 0.18;
         const y = Math.sin(angle) * 0.18;
         return (
-          <mesh
-            key={i}
-            position={[x, y, 0.04]}
-            rotation={[0, 0, angle + Math.PI / 2]}
-          >
+          <mesh key={i} position={[x, y, 0.04]} rotation={[0, 0, angle + Math.PI / 2]}>
             <cylinderGeometry args={[0.12, 0.04, 0.28, 12]} />
-            <meshStandardMaterial
-              color={color}
-              roughness={0.5}
-              metalness={0.05}
-            />
+            <meshStandardMaterial color={color} roughness={0.5} metalness={0.05} />
           </mesh>
         );
       })}
@@ -56,17 +48,9 @@ function FlowerBlossom({
         const x = Math.cos(angle) * 0.1;
         const y = Math.sin(angle) * 0.1;
         return (
-          <mesh
-            key={`inner-${i}`}
-            position={[x, y, 0.06]}
-            rotation={[0, 0, angle]}
-          >
+          <mesh key={`inner-${i}`} position={[x, y, 0.06]} rotation={[0, 0, angle]}>
             <cylinderGeometry args={[0.08, 0.03, 0.18, 12]} />
-            <meshStandardMaterial
-              color="#F1D7D7"
-              roughness={0.4}
-              metalness={0.05}
-            />
+            <meshStandardMaterial color="#F1D7D7" roughness={0.4} metalness={0.05} />
           </mesh>
         );
       })}
@@ -106,8 +90,8 @@ export function FloralFrame3D({ reducedMotion = false }: FloralFrame3DProps) {
       groupRef.current.position.y = Math.sin(time * 0.8) * 0.08;
 
       // Pointer parallax tracking
-      targetRotation.current.x = (state.pointer.y * 0.25);
-      targetRotation.current.y = (state.pointer.x * 0.35);
+      targetRotation.current.x = state.pointer.y * 0.25;
+      targetRotation.current.y = state.pointer.x * 0.35;
 
       groupRef.current.rotation.x = THREE.MathUtils.lerp(
         groupRef.current.rotation.x,
@@ -127,11 +111,7 @@ export function FloralFrame3D({ reducedMotion = false }: FloralFrame3DProps) {
       {/* Outer Wooden Frame */}
       <mesh position={[0, 0, -0.05]} castShadow receiveShadow>
         <boxGeometry args={[3.2, 4.0, 0.2]} />
-        <meshStandardMaterial
-          color="#7A5B4F"
-          roughness={0.45}
-          metalness={0.1}
-        />
+        <meshStandardMaterial color="#7A5B4F" roughness={0.45} metalness={0.1} />
       </mesh>
 
       {/* Inner Frame Inset Border */}
@@ -173,16 +153,8 @@ export function FloralFrame3D({ reducedMotion = false }: FloralFrame3DProps) {
           color="#F1D7D7"
           rotation={[-0.1, 0.2, -0.4]}
         />
-        <LeafMesh
-          position={[1.2, 1.45, 0.03]}
-          rotation={[0, 0, -Math.PI / 4]}
-          scale={0.9}
-        />
-        <LeafMesh
-          position={[0.7, 1.55, 0.03]}
-          rotation={[0, 0, Math.PI / 6]}
-          scale={0.8}
-        />
+        <LeafMesh position={[1.2, 1.45, 0.03]} rotation={[0, 0, -Math.PI / 4]} scale={0.9} />
+        <LeafMesh position={[0.7, 1.55, 0.03]} rotation={[0, 0, Math.PI / 6]} scale={0.8} />
 
         {/* Bottom Left Botanical Cluster */}
         <FlowerBlossom
@@ -203,16 +175,8 @@ export function FloralFrame3D({ reducedMotion = false }: FloralFrame3DProps) {
           color="#D99E9E"
           rotation={[0, 0, 0.8]}
         />
-        <LeafMesh
-          position={[-1.15, -1.4, 0.03]}
-          rotation={[0, 0, (Math.PI * 3) / 4]}
-          scale={1.0}
-        />
-        <LeafMesh
-          position={[-0.4, -1.5, 0.03]}
-          rotation={[0, 0, -Math.PI / 3]}
-          scale={0.8}
-        />
+        <LeafMesh position={[-1.15, -1.4, 0.03]} rotation={[0, 0, (Math.PI * 3) / 4]} scale={1.0} />
+        <LeafMesh position={[-0.4, -1.5, 0.03]} rotation={[0, 0, -Math.PI / 3]} scale={0.8} />
       </group>
 
       {/* Protective Transparent Acrylic/Glass Sheen */}

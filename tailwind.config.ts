@@ -43,7 +43,7 @@ const config: Config = {
             200: "#FAF7F2",
             300: "#F9F6EF", // Primary Cream
             400: "#F2ECE0",
-            500: "#E8DFC E",
+            500: "#E8DFCE",
             600: "#D3C6B1",
             700: "#B7A890",
             800: "#91836E",

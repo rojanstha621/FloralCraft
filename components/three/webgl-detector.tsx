@@ -6,7 +6,11 @@ import { useEffect, useState } from "react";
  * Checks if WebGL is supported and available in the user's browser,
  * and whether the user prefers reduced motion.
  */
-export function useWebGLSupport(): { isSupported: boolean; prefersReducedMotion: boolean; isLoading: boolean } {
+export function useWebGLSupport(): {
+  isSupported: boolean;
+  prefersReducedMotion: boolean;
+  isLoading: boolean;
+} {
   const [isSupported, setIsSupported] = useState<boolean>(true);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -22,8 +26,11 @@ export function useWebGLSupport(): { isSupported: boolean; prefersReducedMotion:
 
       // Check WebGL context
       const canvas = document.createElement("canvas");
-      const gl = canvas.getContext("webgl2") || canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      
+      const gl =
+        canvas.getContext("webgl2") ||
+        canvas.getContext("webgl") ||
+        canvas.getContext("experimental-webgl");
+
       setIsSupported(Boolean(gl));
       setIsLoading(false);
 

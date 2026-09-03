@@ -3,18 +3,17 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, MessageCircle } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { useCart } from "@/lib/store/cart-context";
+import { createWhatsAppUrl } from "@/lib/config/business";
 
 const NAV_LINKS = [
-  { href: "/shop", label: "Shop Gifts" },
-  { href: "/customize", label: "Customize", highlight: true },
-  { href: "/occasions", label: "Occasions" },
+  { href: "/collections", label: "Collections" },
+  { href: "/order", label: "Order" },
   { href: "/about", label: "Our Story" },
   { href: "/reviews", label: "Reviews" },
   { href: "/contact", label: "Contact" },
@@ -23,17 +22,16 @@ const NAV_LINKS = [
 export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const { itemCount, openCartDrawer } = useCart();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-brand-beige-300/40 bg-brand-cream/90 backdrop-blur-md transition-all">
+    <header className="sticky top-0 z-40 w-full border-b border-brand-brown/10 bg-[#faf6ef]/80 shadow-[0_10px_40px_rgba(62,39,30,.04)] backdrop-blur-xl transition-all">
       {/* Top Notification Bar */}
-      <div className="bg-brand-brown px-4 py-1.5 text-center text-[11px] font-medium tracking-wider text-brand-cream uppercase">
-        <span>Handmade with love in Kathmandu, Nepal • Free Valley Delivery over Rs. 3,500</span>
+      <div className="bg-brand-brown-900 px-4 py-2 text-center text-[9px] font-semibold uppercase tracking-[.22em] text-brand-cream">
+        <span>Complimentary message card with every keepsake · Handmade in Kathmandu</span>
       </div>
 
       <Container size="xl">
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex h-[76px] items-center justify-between">
           {/* Brand Logo */}
           <div className="flex items-center">
             <Logo variant="horizontal" size="md" />
@@ -48,38 +46,28 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "text-sm font-medium tracking-wide transition-colors duration-150 hover:text-brand-brown",
-                    isActive ? "text-brand-brown font-semibold underline decoration-brand-pink decoration-2 underline-offset-8" : "text-brand-brown/75",
-                    link.highlight && "inline-flex items-center gap-1 text-brand-brown-600 font-semibold"
+                    "relative py-2 text-[13px] font-semibold tracking-wide transition-colors duration-200 after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-brand-pink-600 after:transition-transform hover:text-brand-brown hover:after:scale-x-100",
+                    isActive ? "text-brand-brown after:scale-x-100" : "text-brand-brown/75"
                   )}
                 >
-                  {link.highlight && <Sparkles className="h-3.5 w-3.5 text-brand-pink-500" />}
                   {link.label}
                 </Link>
               );
             })}
           </nav>
 
-          {/* Right Action Icons (Cart + CTA) */}
+          {/* Right conversion action */}
           <div className="flex items-center space-x-3">
-            <button
-              onClick={openCartDrawer}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full border border-brand-beige-400/50 bg-white/60 text-brand-brown transition-colors hover:bg-brand-cream-200"
-              aria-label="Shopping Bag"
+            <a
+              href={createWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden lg:inline-flex"
             >
-              <ShoppingBag className="h-4 w-4" />
-              {itemCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-pink-500 text-[9px] font-bold text-white shadow-xs">
-                  {itemCount}
-                </span>
-              )}
-            </button>
-
-            <Link href="/customize" className="hidden lg:inline-flex">
-              <Button variant="primary" size="sm">
-                Create Gift
+              <Button variant="primary" size="sm" className="gap-2" tabIndex={-1}>
+                <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
               </Button>
-            </Link>
+            </a>
 
             {/* Mobile Menu Button */}
             <button
@@ -97,25 +85,29 @@ export function Navbar() {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="border-b border-brand-beige-300 bg-brand-cream px-6 py-6 md:hidden animate-fadeIn">
+        <div className="animate-fadeIn border-b border-brand-beige-300 bg-brand-cream px-6 py-6 md:hidden">
           <nav className="flex flex-col space-y-4">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between text-base font-medium text-brand-brown py-2 border-b border-brand-beige-200"
+                className="flex items-center justify-between border-b border-brand-beige-200 py-2 text-base font-medium text-brand-brown"
               >
                 <span>{link.label}</span>
-                {link.highlight && <Sparkles className="h-4 w-4 text-brand-pink-500" />}
               </Link>
             ))}
             <div className="pt-4">
-              <Link href="/customize" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="primary" size="lg" className="w-full">
-                  Create Custom Gift
+              <a
+                href={createWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Button variant="primary" size="lg" className="w-full gap-2" tabIndex={-1}>
+                  <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
                 </Button>
-              </Link>
+              </a>
             </div>
           </nav>
         </div>

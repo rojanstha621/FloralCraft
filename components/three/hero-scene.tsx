@@ -30,7 +30,7 @@ export function HeroScene() {
         <Canvas
           shadows
           gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
-          dpr={[1, 2]}
+          dpr={[1, 1.5]}
           className="h-full w-full cursor-grab active:cursor-grabbing"
         >
           <PerspectiveCamera makeDefault position={[0, 0, 5.8]} fov={45} />
@@ -60,13 +60,13 @@ export function HeroScene() {
 
           {/* Subtle Ambient Petals */}
           {!prefersReducedMotion && (
-            <FloatingPetals3D count={14} reducedMotion={prefersReducedMotion} />
+            <FloatingPetals3D count={10} reducedMotion={prefersReducedMotion} />
           )}
         </Canvas>
       </Suspense>
 
       {/* Interactive Micro-hint */}
-      <div className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-brand-beige-400/40 bg-white/70 px-3 py-1 text-[10px] font-medium tracking-wider text-brand-brown-500 backdrop-blur-xs uppercase shadow-subtle">
+      <div className="backdrop-blur-xs pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full border border-brand-beige-400/40 bg-white/70 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-brand-brown-500 shadow-subtle">
         Move pointer to interact
       </div>
     </div>

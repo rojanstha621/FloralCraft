@@ -13,13 +13,14 @@ export default function OccasionsPage() {
   return (
     <div className="py-12 md:py-20">
       <Container size="xl">
-        <div className="text-center space-y-3 mb-14">
+        <div className="mb-14 space-y-3 text-center">
           <Badge variant="pink">Celebrate Milestones</Badge>
           <Heading as="h1" size="2xl" className="font-serif">
             Gifts Tailored by Occasion
           </Heading>
-          <Text size="base" variant="muted" className="max-w-xl mx-auto">
-            Discover bespoke floral keepsakes curated for birthdays, anniversaries, weddings, gratitude, and life’s most cherished celebrations.
+          <Text size="base" variant="muted" className="mx-auto max-w-xl">
+            Discover bespoke floral keepsakes curated for birthdays, anniversaries, weddings,
+            gratitude, and life’s most cherished celebrations.
           </Text>
         </div>
 
@@ -27,7 +28,7 @@ export default function OccasionsPage() {
           {OCCASIONS.map((occ) => (
             <div
               key={occ.title}
-              className="group flex flex-col overflow-hidden rounded-3xl border border-brand-beige-300 bg-white shadow-card hover:shadow-elevated transition-all"
+              className="group flex flex-col overflow-hidden rounded-3xl border border-brand-beige-300 bg-white shadow-card transition-all hover:shadow-elevated"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden bg-brand-cream-100">
                 <Image
@@ -38,7 +39,7 @@ export default function OccasionsPage() {
                 />
               </div>
 
-              <div className="flex flex-1 flex-col justify-between p-6 space-y-4">
+              <div className="flex flex-1 flex-col justify-between space-y-4 p-6">
                 <div>
                   <Heading as="h3" size="md" className="font-serif text-brand-brown">
                     {occ.title}

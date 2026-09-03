@@ -8,7 +8,7 @@ export default function TermsPage() {
   return (
     <div className="py-12 md:py-20">
       <Container size="md">
-        <div className="rounded-4xl border border-brand-beige-300 bg-white p-8 md:p-14 shadow-card space-y-8">
+        <div className="space-y-8 rounded-4xl border border-brand-beige-300 bg-white p-8 shadow-card md:p-14">
           <div className="space-y-3 border-b border-brand-beige-200 pb-6">
             <Badge variant="pink">Legal Agreement</Badge>
             <Heading as="h1" size="2xl" className="font-serif">
@@ -19,13 +19,14 @@ export default function TermsPage() {
             </Text>
           </div>
 
-          <div className="space-y-6 text-xs text-brand-brown leading-relaxed">
+          <div className="space-y-6 text-xs leading-relaxed text-brand-brown">
             <section className="space-y-2">
               <h2 className="font-serif text-base font-semibold text-brand-brown">
                 1. Acceptance of Terms
               </h2>
               <p className="text-brand-brown-600">
-                By browsing, interacting with our 3D customizer, or placing an order on Petal Craft Florals, you agree to be bound by these terms, our Delivery Policy, and our Refund Policy.
+                By browsing this website or confirming an order with Petal Craft Florals through
+                WhatsApp, you agree to these terms, our Delivery Policy, and our Refund Policy.
               </p>
             </section>
 
@@ -34,7 +35,9 @@ export default function TermsPage() {
                 2. Handmade Botanical Variations
               </h2>
               <p className="text-brand-brown-600">
-                Each flower blossom is organically grown and naturally preserved. Minor variations in flower petal size, color shading, and stem curves are natural characteristics of genuine botanical art and make every individual keepsake frame completely unique.
+                Each flower blossom is organically grown and naturally preserved. Minor variations
+                in flower petal size, color shading, and stem curves are natural characteristics of
+                genuine botanical art and make every individual keepsake frame completely unique.
               </p>
             </section>
 
@@ -43,7 +46,8 @@ export default function TermsPage() {
                 3. Intellectual Property
               </h2>
               <p className="text-brand-brown-600">
-                All branding assets, photography, 3D presentations, web designs, and copy are the proprietary intellectual property of Petal Craft Florals, Kathmandu, Nepal.
+                All branding assets, photography, 3D presentations, web designs, and copy are the
+                proprietary intellectual property of Petal Craft Florals, Kathmandu, Nepal.
               </p>
             </section>
           </div>

@@ -28,8 +28,8 @@ const FAQS: FAQItem[] = [
   },
   {
     category: "Custom Orders",
-    q: "Can I customize the frame with my own photo and custom message?",
-    a: "Yes! End-to-end personalization is our signature. Through our 3D Customizer, you can upload any high-resolution photo from your phone, choose your frame timber, select the flower palette, and write personalized vows, names, and milestone dates.",
+    q: "Can I request a special message or personal detail?",
+    a: "Some keepsakes can include personal details depending on the design. Send us your idea on WhatsApp and our studio will confirm what is possible, the timeline, and the final price before you order.",
   },
   {
     category: "Custom Orders",
@@ -47,9 +47,9 @@ const FAQS: FAQItem[] = [
     a: "Delivery inside Kathmandu Valley is FREE for all orders above Rs. 3,500. For orders below this threshold, a flat delivery fee of Rs. 150 applies.",
   },
   {
-    category: "Payments",
-    q: "Which payment options are accepted?",
-    a: "We accept all major Nepal digital payment gateways: eSewa (ePay v2), Khalti (v2), Fonepay QR (compatible with all commercial mobile banking apps in Nepal), direct bank transfer, and Cash on Delivery (COD) within Kathmandu Valley.",
+    category: "Ordering",
+    q: "How do I place an order?",
+    a: "Choose a keepsake from our collections and tap Order via WhatsApp. We will confirm availability, delivery timing, and payment details with you directly before finalizing the order.",
   },
 ];
 
@@ -60,13 +60,14 @@ export default function FAQPage() {
     <div className="py-12 md:py-20">
       <Container size="md">
         {/* Header */}
-        <div className="text-center space-y-3 mb-12">
+        <div className="mb-12 space-y-3 text-center">
           <Badge variant="sage">Frequently Asked Questions</Badge>
           <Heading as="h1" size="2xl" className="font-serif">
             Care, Delivery &amp; Custom Keepsakes
           </Heading>
-          <Text size="base" variant="muted" className="max-w-md mx-auto">
-            Everything you need to know about preserving memories with Petal Craft Florals in Kathmandu.
+          <Text size="base" variant="muted" className="mx-auto max-w-md">
+            Everything you need to know about preserving memories with Petal Craft Florals in
+            Kathmandu.
           </Text>
         </div>
 
@@ -75,7 +76,7 @@ export default function FAQPage() {
           {FAQS.map((faq, idx) => (
             <div
               key={idx}
-              className="rounded-3xl border border-brand-beige-300 bg-white overflow-hidden shadow-card transition-shadow hover:shadow-elevated"
+              className="overflow-hidden rounded-3xl border border-brand-beige-300 bg-white shadow-card transition-shadow hover:shadow-elevated"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === idx ? null : idx)}
@@ -85,19 +86,19 @@ export default function FAQPage() {
                   <span className="text-[10px] font-bold uppercase tracking-wider text-brand-sage-800">
                     {faq.category}
                   </span>
-                  <h3 className="font-serif text-base font-semibold text-brand-brown">
-                    {faq.q}
-                  </h3>
+                  <h3 className="font-serif text-base font-semibold text-brand-brown">{faq.q}</h3>
                 </div>
-                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-cream-200 text-brand-brown transition-transform ${
-                  openIndex === idx ? "rotate-180" : ""
-                }`}>
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-cream-200 text-brand-brown transition-transform ${
+                    openIndex === idx ? "rotate-180" : ""
+                  }`}
+                >
                   <ChevronDown className="h-4 w-4" />
                 </div>
               </button>
 
               {openIndex === idx && (
-                <div className="border-t border-brand-beige-200 p-6 pt-4 bg-brand-cream-50/50 text-xs text-brand-brown-700 leading-relaxed">
+                <div className="border-t border-brand-beige-200 bg-brand-cream-50/50 p-6 pt-4 text-xs leading-relaxed text-brand-brown-700">
                   <p>{faq.a}</p>
                 </div>
               )}
@@ -106,13 +107,14 @@ export default function FAQPage() {
         </div>
 
         {/* Contact Banner */}
-        <div className="mt-16 rounded-3xl border border-brand-pink-300 bg-brand-pink-50/60 p-8 text-center space-y-4">
-          <HelpCircle className="h-8 w-8 text-brand-pink-600 mx-auto" />
+        <div className="mt-16 space-y-4 rounded-3xl border border-brand-pink-300 bg-brand-pink-50/60 p-8 text-center">
+          <HelpCircle className="mx-auto h-8 w-8 text-brand-pink-600" />
           <Heading as="h3" size="md" className="font-serif">
             Have a custom request or specific question?
           </Heading>
-          <Text size="xs" variant="muted" className="max-w-sm mx-auto">
-            Our team in Kathmandu is happy to assist with special milestone inquiries or corporate bulk orders.
+          <Text size="xs" variant="muted" className="mx-auto max-w-sm">
+            Our team in Kathmandu is happy to assist with special milestone inquiries or corporate
+            bulk orders.
           </Text>
           <div className="pt-2">
             <Link href="/contact">

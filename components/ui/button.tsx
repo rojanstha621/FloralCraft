@@ -3,22 +3,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-full text-sm font-medium tracking-wide transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-sage focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center rounded-full text-sm font-semibold tracking-wide transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-sage focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
         primary:
-          "bg-brand-brown text-brand-cream-50 hover:bg-brand-brown-600 shadow-sm hover:shadow-subtle",
-        secondary:
-          "bg-brand-sage text-brand-brown-900 hover:bg-brand-sage-500 shadow-sm",
-        soft:
-          "bg-brand-pink-100 text-brand-brown-800 hover:bg-brand-pink-200 border border-brand-pink-300/40",
+          "bg-brand-brown-900 text-brand-cream-50 hover:-translate-y-0.5 hover:bg-brand-brown-700 shadow-sm hover:shadow-subtle",
+        secondary: "bg-brand-sage text-brand-brown-900 hover:bg-brand-sage-500 shadow-sm",
+        soft: "bg-brand-pink-100 text-brand-brown-800 hover:bg-brand-pink-200 border border-brand-pink-300/40",
         outline:
           "border border-brand-brown/30 bg-transparent text-brand-brown hover:bg-brand-cream-200/60",
-        ghost:
-          "text-brand-brown hover:bg-brand-cream-200/50",
-        accent:
-          "bg-brand-pink text-brand-brown-900 hover:bg-brand-pink-400 shadow-sm",
+        ghost: "text-brand-brown hover:bg-brand-cream-200/50",
+        accent: "bg-brand-pink text-brand-brown-900 hover:bg-brand-pink-400 shadow-sm",
       },
       size: {
         sm: "h-8 px-4 text-xs",
@@ -35,8 +31,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   isLoading?: boolean;
 }
 

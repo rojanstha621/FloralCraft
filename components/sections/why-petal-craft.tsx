@@ -7,20 +7,21 @@ import { Flower2, Sparkles, PackageCheck, MapPin } from "lucide-react";
 
 export function WhyPetalCraft() {
   return (
-    <section className="py-16 bg-brand-cream-200/40">
+    <section className="bg-[#efe5dc] py-24 sm:py-28">
       <Container size="xl">
-        <div className="text-center space-y-3 mb-12">
+        <div className="mb-14 space-y-4 text-center">
           <Badge variant="pink">The Petal Craft Standard</Badge>
           <Heading as="h2" size="2xl">
-            Why Petal Craft Florals
+            Beauty in every last detail.
           </Heading>
-          <Text size="sm" variant="muted" className="max-w-xl mx-auto">
-            We are not a generic flower shop. We preserve emotions and stories through archival botanical craftsmanship.
+          <Text size="sm" variant="muted" className="mx-auto max-w-xl">
+            We are not a generic flower shop. We preserve emotions and stories through archival
+            botanical craftsmanship.
           </Text>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          <div className="flex flex-col items-center text-center rounded-3xl border border-brand-beige-300/80 bg-white/80 p-8 shadow-card space-y-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-pink-100 text-brand-brown">
               <Flower2 className="h-6 w-6 text-brand-brown" />
             </div>
@@ -28,11 +29,12 @@ export function WhyPetalCraft() {
               100% Real Preserved Flowers
             </Heading>
             <Text size="xs" variant="muted">
-              Unlike fresh cut flowers that fade in days, our naturally treated florals maintain their color and texture for years without water.
+              Unlike fresh cut flowers that fade in days, our naturally treated florals maintain
+              their color and texture for years without water.
             </Text>
           </div>
 
-          <div className="flex flex-col items-center text-center rounded-3xl border border-brand-beige-300/80 bg-white/80 p-8 shadow-card space-y-3">
+          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-sage-100 text-brand-brown">
               <Sparkles className="h-6 w-6 text-brand-sage-800" />
             </div>
@@ -40,11 +42,12 @@ export function WhyPetalCraft() {
               End-to-End Personalization
             </Heading>
             <Text size="xs" variant="muted">
-              From your cherished photos and names to bespoke botanical arrangements, each creation is one of a kind.
+              From your cherished photos and names to bespoke botanical arrangements, each creation
+              is one of a kind.
             </Text>
           </div>
 
-          <div className="flex flex-col items-center text-center rounded-3xl border border-brand-beige-300/80 bg-white/80 p-8 shadow-card space-y-3">
+          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-beige-200 text-brand-brown">
               <PackageCheck className="h-6 w-6 text-brand-brown" />
             </div>
@@ -52,11 +55,12 @@ export function WhyPetalCraft() {
               Luxury Unboxing Experience
             </Heading>
             <Text size="xs" variant="muted">
-              Wrapped in tactile cotton paper, fastened with handmade botanical wax seals, and presented in rigid gift boxes.
+              Wrapped in tactile cotton paper, fastened with handmade botanical wax seals, and
+              presented in rigid gift boxes.
             </Text>
           </div>
 
-          <div className="flex flex-col items-center text-center rounded-3xl border border-brand-beige-300/80 bg-white/80 p-8 shadow-card space-y-3">
+          <div className="flex flex-col items-center space-y-3 rounded-[2rem] border border-white/80 bg-white/60 p-8 text-center shadow-[0_24px_60px_-45px_rgba(61,39,30,.7)] backdrop-blur-md">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-pink-50 text-brand-brown">
               <MapPin className="h-6 w-6 text-brand-pink-600" />
             </div>
@@ -64,7 +68,8 @@ export function WhyPetalCraft() {
               Made in Kathmandu, Nepal
             </Heading>
             <Text size="xs" variant="muted">
-              Proudly crafted by local Nepali artisans with prompt, dedicated delivery across Kathmandu Valley.
+              Proudly crafted by local Nepali artisans with prompt, dedicated delivery across
+              Kathmandu Valley.
             </Text>
           </div>
         </div>

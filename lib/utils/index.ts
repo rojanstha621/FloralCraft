@@ -11,10 +11,10 @@ export function cn(...inputs: ClassValue[]): string {
 /**
  * Formats a numerical price to Nepalese Rupee representation (e.g., Rs. 1,999)
  */
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number | string | { toString(): string }): string {
   const formatted = new Intl.NumberFormat("en-NP", {
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(Number(amount));
   return `Rs. ${formatted}`;
 }
 

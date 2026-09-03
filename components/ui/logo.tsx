@@ -18,7 +18,7 @@ export function Logo({
   const content = (
     <div
       className={cn(
-        "inline-flex items-center select-none text-brand-brown transition-opacity hover:opacity-90",
+        "inline-flex select-none items-center text-brand-brown transition-opacity hover:opacity-90",
         className
       )}
       {...props}
@@ -89,7 +89,7 @@ export function Logo({
           )}
         >
           {/* Decorative botanical ring */}
-          <svg className="absolute inset-0 h-full w-full animate-spin-slow" viewBox="0 0 100 100">
+          <svg className="animate-spin-slow absolute inset-0 h-full w-full" viewBox="0 0 100 100">
             <circle
               cx="50"
               cy="50"
@@ -102,10 +102,10 @@ export function Logo({
           </svg>
           <span className="font-serif text-lg font-bold tracking-widest text-brand-brown">PC</span>
           <div className="my-0.5 h-[1px] w-6 bg-brand-pink" />
-          <span className="font-serif text-[10px] tracking-wider uppercase text-brand-brown/90">
+          <span className="font-serif text-[10px] uppercase tracking-wider text-brand-brown/90">
             Petal Craft
           </span>
-          <span className="text-[7px] tracking-widest text-brand-sage-600 uppercase">Florals</span>
+          <span className="text-[7px] uppercase tracking-widest text-brand-sage-600">Florals</span>
           <span className="mt-1 text-[8px] text-brand-pink-500">♥</span>
         </div>
       )}
@@ -116,10 +116,10 @@ export function Logo({
             <span className="font-serif text-sm font-semibold tracking-wider">PC</span>
           </div>
           <div className="flex flex-col">
-            <span className="font-serif text-lg font-semibold tracking-wide text-brand-brown leading-tight">
+            <span className="font-serif text-lg font-semibold leading-tight tracking-wide text-brand-brown">
               Petal Craft
             </span>
-            <span className="text-[10px] font-medium tracking-widest uppercase text-brand-sage-700">
+            <span className="text-[10px] font-medium uppercase tracking-widest text-brand-sage-700">
               Florals • Kathmandu
             </span>
           </div>
@@ -134,10 +134,10 @@ export function Logo({
           <span className="font-serif text-2xl font-semibold tracking-wide text-brand-brown">
             Petal Craft Florals
           </span>
-          <span className="mt-0.5 text-xs italic text-brand-brown/80 font-serif">
+          <span className="mt-0.5 font-serif text-xs italic text-brand-brown/80">
             &ldquo;More than just flowers... it&apos;s a feeling.&rdquo;
           </span>
-          <span className="mt-1 text-[10px] tracking-widest uppercase text-brand-sage-700">
+          <span className="mt-1 text-[10px] uppercase tracking-widest text-brand-sage-700">
             Handmade in Kathmandu, Nepal
           </span>
         </div>

@@ -5,12 +5,7 @@ export interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "sm" | "md" | "lg" | "xl" | "full";
 }
 
-export function Container({
-  className,
-  size = "xl",
-  children,
-  ...props
-}: ContainerProps) {
+export function Container({ className, size = "xl", children, ...props }: ContainerProps) {
   return (
     <div
       className={cn(

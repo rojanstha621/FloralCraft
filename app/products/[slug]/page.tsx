@@ -1,373 +1,272 @@
-"use client";
-
-import React, { useState } from "react";
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+import { notFound } from "next/navigation";
+import { Clock, Heart, Layers, Ruler, ShieldCheck, Truck } from "lucide-react";
+import prisma from "@/lib/db/prisma";
 import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { PRODUCTS } from "@/lib/data/products";
-import { useCart } from "@/lib/store/cart-context";
-import { formatCurrency } from "@/lib/utils";
-import {
-  Sparkles,
-  ShoppingBag,
-  Heart,
-  Truck,
-  ShieldCheck,
-  Clock,
-  Ruler,
-  Layers,
-  ChevronDown,
-  Plus,
-  Minus,
-} from "lucide-react";
+import { ProductGallery } from "@/components/products/product-gallery";
+import { ProductCard } from "@/components/products/product-card";
+import { RatingSummary } from "@/components/products/rating-summary";
+import { WhatsAppButton } from "@/components/ui/whatsapp-button";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
-export default function ProductDetailPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
-  const product = PRODUCTS.find((p) => p.slug === slug);
+type PageProps = { params: Promise<{ slug: string }> };
 
-  const { addToCart } = useCart();
+async function getProduct(slug: string) {
+  return prisma.product.findFirst({
+    where: { slug, archivedAt: null },
+    include: {
+      category: true,
+      productType: true,
+      images: { orderBy: { sortOrder: "asc" } },
+      customizationOptions: {
+        where: { active: true },
+        orderBy: { sortOrder: "asc" },
+      },
+      reviews: { where: { status: "APPROVED" }, orderBy: { createdAt: "desc" } },
+    },
+  });
+}
 
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
-  const [quantity, setQuantity] = useState<number>(1);
-  const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) return { title: "Keepsake not found" };
+  const image = product.images[0]?.url;
+  return {
+    title: product.name,
+    description: product.tagline || product.description.slice(0, 155),
+    alternates: { canonical: `/products/${product.slug}` },
+    openGraph: {
+      title: product.name,
+      description: product.tagline || product.description,
+      images: image ? [image] : [],
+    },
+  };
+}
 
-  if (!product) {
-    notFound();
-  }
+export default async function ProductDetailPage({ params }: PageProps) {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) notFound();
 
-  const relatedProducts = PRODUCTS.filter(
-    (p) => p.categorySlug === product.categorySlug && p.id !== product.id
-  ).slice(0, 3);
-
-  const handleAddToCart = () => {
-    addToCart(product, quantity);
+  const reviewCount = product.reviews.length;
+  const averageRating = reviewCount
+    ? product.reviews.reduce((sum, review) => sum + review.rating, 0) / reviewCount
+    : 0;
+  const relatedRaw = await prisma.product.findMany({
+    where: {
+      categoryId: product.categoryId,
+      id: { not: product.id },
+      archivedAt: null,
+    },
+    include: {
+      category: true,
+      productType: true,
+      images: true,
+      reviews: { where: { status: "APPROVED" }, select: { rating: true } },
+    },
+    take: 3,
+  });
+  const related = relatedRaw.map(({ reviews, ...item }) => ({
+    ...item,
+    price: Number(item.price),
+    compareAtPrice: item.compareAtPrice ? Number(item.compareAtPrice) : null,
+    averageRating: reviews.length
+      ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+      : 0,
+    reviewCount: reviews.length,
+  }));
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.images.map((image) => image.url),
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "NPR",
+      price: Number(product.price),
+      availability: product.available
+        ? "https://schema.org/InStock"
+        : "https://schema.org/PreOrder",
+    },
+    ...(reviewCount
+      ? { aggregateRating: { "@type": "AggregateRating", ratingValue: averageRating, reviewCount } }
+      : {}),
   };
 
   return (
-    <div className="py-10 md:py-16">
+    <div className="py-8 md:py-14">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c") }}
+      />
       <Container size="xl">
-        {/* Breadcrumb Navigation */}
-        <nav className="mb-8 flex items-center space-x-2 text-xs text-brand-brown-400">
-          <Link href="/" className="hover:text-brand-brown transition-colors">
-            Home
-          </Link>
+        <nav
+          className="mb-7 flex flex-wrap items-center gap-2 text-xs text-brand-brown-400"
+          aria-label="Breadcrumb"
+        >
+          <Link href="/">Home</Link>
           <span>/</span>
-          <Link href="/shop" className="hover:text-brand-brown transition-colors">
-            Shop
-          </Link>
+          <Link href="/collections">Collections</Link>
           <span>/</span>
-          <Link
-            href={`/shop?category=${product.categorySlug}`}
-            className="hover:text-brand-brown transition-colors"
-          >
-            {product.category}
-          </Link>
-          <span>/</span>
-          <span className="text-brand-brown font-medium truncate max-w-xs">{product.name}</span>
+          <span className="text-brand-brown">{product.name}</span>
         </nav>
-
-        {/* Main Product Layout */}
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-          {/* Left: Product Gallery */}
-          <div className="lg:col-span-7 space-y-4">
-            {/* Primary Large Image */}
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-brand-beige-300 bg-brand-cream-100 shadow-card">
-              <Image
-                src={product.images[selectedImageIndex]?.url || product.images[0]?.url || ""}
-                alt={product.images[selectedImageIndex]?.altText || product.name}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                className="object-cover transition-transform duration-500 hover:scale-105"
-              />
-
-              {product.isCustomizable && (
-                <div className="absolute top-4 left-4">
-                  <Badge variant="sage" className="shadow-subtle gap-1 bg-white/90 backdrop-blur-xs">
-                    <Sparkles className="h-3 w-3 text-brand-sage-800" />
-                    <span>Customizable with Your Photo &amp; Words</span>
-                  </Badge>
-                </div>
-              )}
-            </div>
-
-            {/* Thumbnail Row */}
-            {product.images.length > 1 && (
-              <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                {product.images.map((img, idx) => (
-                  <button
-                    key={img.url}
-                    onClick={() => setSelectedImageIndex(idx)}
-                    className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-2 transition-all ${
-                      selectedImageIndex === idx
-                        ? "border-brand-brown shadow-subtle scale-95"
-                        : "border-brand-beige-300 opacity-70 hover:opacity-100"
-                    }`}
-                  >
-                    <Image
-                      src={img.url}
-                      alt={img.altText}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-14">
+          <div className="lg:col-span-7">
+            <ProductGallery images={product.images} name={product.name} />
           </div>
-
-          {/* Right: Product Details & Actions */}
-          <div className="lg:col-span-5 space-y-6">
-            <div className="space-y-2">
-              <span className="text-xs font-semibold tracking-wider uppercase text-brand-sage-800">
-                {product.category}
-              </span>
-
-              <Heading as="h1" size="xl" className="font-serif">
+          <section className="space-y-6 lg:col-span-5">
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="sage">{product.category.name}</Badge>
+                <Badge>{product.productType.name}</Badge>
+              </div>
+              <Heading as="h1" size="xl">
                 {product.name}
               </Heading>
-
               <Text size="sm" variant="muted">
-                {product.tagline}
+                {product.tagline || product.description}
               </Text>
+              <RatingSummary rating={averageRating} count={reviewCount} />
             </div>
-
-            {/* Price & Nepal Trust Badge */}
-            <div className="flex items-baseline justify-between border-y border-brand-beige-200 py-4">
-              <div className="flex items-baseline gap-3">
-                <span className="font-serif text-3xl font-bold text-brand-brown">
-                  {formatCurrency(product.basePrice)}
+            <div className="border-y border-brand-beige-200 py-4">
+              <span className="font-serif text-3xl font-bold text-brand-brown">
+                {formatCurrency(product.price)}
+              </span>
+              {product.compareAtPrice && (
+                <span className="ml-3 text-sm text-brand-brown-400 line-through">
+                  {formatCurrency(product.compareAtPrice)}
                 </span>
-                {product.compareAtPrice && (
-                  <span className="text-sm text-brand-brown-400 line-through">
-                    {formatCurrency(product.compareAtPrice)}
-                  </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="flex items-center gap-2 rounded-2xl border bg-white/70 p-3">
+                <Ruler className="h-4 w-4 text-brand-sage-700" />
+                <span>{product.dimensions || "Ask for sizing"}</span>
+              </div>
+              <div className="flex items-center gap-2 rounded-2xl border bg-white/70 p-3">
+                <Clock className="h-4 w-4 text-brand-pink-600" />
+                <span>
+                  {product.preparationDays
+                    ? `${product.preparationDays} day preparation`
+                    : "Preparation time on request"}
+                </span>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Link
+                href={`/order?product=${product.id}`}
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-brand-brown px-6 text-sm font-semibold text-white transition hover:bg-brand-brown-700"
+              >
+                Request this piece
+              </Link>
+              <WhatsAppButton
+                productName={product.name}
+                price={Number(product.price)}
+                label="Order via WhatsApp"
+                className="w-full"
+              />
+            </div>
+            <p className="text-center text-[11px] leading-relaxed text-brand-brown-400">
+              Ask about availability, delivery date, and any special request directly with our
+              Kathmandu studio.
+            </p>
+            <div className="space-y-4 rounded-3xl border border-brand-beige-300 bg-white/70 p-6">
+              <div>
+                <h2 className="font-serif text-lg font-semibold">About this keepsake</h2>
+                <p className="mt-2 text-sm leading-relaxed text-brand-brown-600">
+                  {product.description}
+                </p>
+                {product.customizable && product.customizationSummary && (
+                  <p className="mt-3 text-sm leading-relaxed text-brand-brown-500">
+                    <strong>Customization:</strong> {product.customizationSummary}
+                  </p>
                 )}
               </div>
-
-              <div className="flex items-center gap-1.5 text-xs text-brand-sage-800 font-medium">
-                <Heart className="h-3.5 w-3.5 fill-brand-pink text-brand-pink" />
-                <span>Handmade in Kathmandu</span>
-              </div>
-            </div>
-
-            {/* Quick Specs Pill Badges */}
-            <div className="grid grid-cols-2 gap-3 text-xs text-brand-brown-700">
-              <div className="flex items-center gap-2 rounded-2xl border border-brand-beige-300 bg-white/70 p-3">
-                <Ruler className="h-4 w-4 text-brand-sage-700 shrink-0" />
-                <span className="truncate">{product.dimensions}</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-2xl border border-brand-beige-300 bg-white/70 p-3">
-                <Clock className="h-4 w-4 text-brand-pink-600 shrink-0" />
-                <span>{product.prepTimeDays} Business Days Prep</span>
-              </div>
-            </div>
-
-            {/* Actions: Customize or Add to Cart */}
-            <div className="space-y-4 pt-2">
-              {product.isCustomizable ? (
-                <div className="space-y-3">
-                  <Link href={`/customize?product=${product.slug}`} className="block">
-                    <Button variant="primary" size="lg" className="w-full gap-2 shadow-card hover:shadow-elevated">
-                      <Sparkles className="h-4 w-4 text-brand-pink-300" />
-                      <span>Customize Photo &amp; Message</span>
-                    </Button>
-                  </Link>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center rounded-full border border-brand-beige-300 bg-white px-3 py-1">
-                      <button
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        className="p-1 text-brand-brown hover:opacity-75"
-                        aria-label="Decrease quantity"
-                      >
-                        <Minus className="h-3.5 w-3.5" />
-                      </button>
-                      <span className="w-8 text-center text-xs font-semibold">{quantity}</span>
-                      <button
-                        onClick={() => setQuantity(quantity + 1)}
-                        className="p-1 text-brand-brown hover:opacity-75"
-                        aria-label="Increase quantity"
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="flex-1 gap-2"
-                      onClick={handleAddToCart}
-                    >
-                      <ShoppingBag className="h-4 w-4" />
-                      <span>Add Ready-Made</span>
-                    </Button>
+              {product.materials && (
+                <div className="flex gap-3 border-t pt-4">
+                  <Layers className="mt-0.5 h-4 w-4 shrink-0 text-brand-sage-700" />
+                  <div>
+                    <h3 className="text-xs font-bold">Materials</h3>
+                    <p className="mt-1 text-xs leading-relaxed text-brand-brown-500">
+                      {product.materials}
+                    </p>
                   </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center rounded-full border border-brand-beige-300 bg-white px-3 py-1.5">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="p-1 text-brand-brown hover:opacity-75"
-                      aria-label="Decrease quantity"
-                    >
-                      <Minus className="h-4 w-4" />
-                    </button>
-                    <span className="w-10 text-center text-sm font-semibold">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="p-1 text-brand-brown hover:opacity-75"
-                      aria-label="Increase quantity"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </button>
-                  </div>
-
-                  <Button
-                    variant="primary"
-                    size="lg"
-                    className="flex-1 gap-2"
-                    onClick={handleAddToCart}
-                  >
-                    <ShoppingBag className="h-4 w-4" />
-                    <span>Add to Shopping Bag</span>
-                  </Button>
                 </div>
               )}
             </div>
-
-            {/* Accordion Information */}
-            <div className="space-y-3 pt-4 border-t border-brand-beige-200">
-              {/* Description & Story */}
-              <div className="rounded-2xl border border-brand-beige-300 bg-white/70 overflow-hidden">
-                <button
-                  onClick={() => setActiveAccordion(activeAccordion === "details" ? null : "details")}
-                  className="flex w-full items-center justify-between p-4 text-xs font-semibold text-brand-brown"
-                >
-                  <span className="flex items-center gap-2">
-                    <Layers className="h-4 w-4 text-brand-sage-700" />
-                    <span>Story &amp; Materials</span>
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      activeAccordion === "details" ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {activeAccordion === "details" && (
-                  <div className="p-4 pt-0 space-y-3 text-xs text-brand-brown-600 border-t border-brand-beige-100">
-                    <p className="leading-relaxed">{product.description}</p>
-                    <div className="p-3 rounded-xl bg-brand-cream-200/60 space-y-1">
-                      <span className="font-semibold text-brand-brown">Materials:</span>
-                      <p>{product.materials}</p>
-                    </div>
-                  </div>
-                )}
+            <div className="grid gap-3 text-xs sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              <div className="flex items-center gap-2">
+                <Heart className="h-4 w-4 text-brand-pink-500" /> Handmade in Nepal
               </div>
-
-              {/* Delivery & Packaging */}
-              <div className="rounded-2xl border border-brand-beige-300 bg-white/70 overflow-hidden">
-                <button
-                  onClick={() => setActiveAccordion(activeAccordion === "delivery" ? null : "delivery")}
-                  className="flex w-full items-center justify-between p-4 text-xs font-semibold text-brand-brown"
-                >
-                  <span className="flex items-center gap-2">
-                    <Truck className="h-4 w-4 text-brand-sage-700" />
-                    <span>Kathmandu Delivery &amp; Packaging</span>
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      activeAccordion === "delivery" ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {activeAccordion === "delivery" && (
-                  <div className="p-4 pt-0 space-y-2 text-xs text-brand-brown-600 border-t border-brand-beige-100">
-                    <p>
-                      • <strong>Kathmandu Valley:</strong> Hand-delivered within 2-4 business days. Free for orders above Rs. 3,500.
-                    </p>
-                    <p>
-                      • <strong>Packaging:</strong> Encased in protective bubble insulation and placed inside our rigid gift box with wax stamp seal.
-                    </p>
-                  </div>
-                )}
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-brand-sage-700" /> Secure packaging
               </div>
-
-              {/* Preserved Flower Care Guide */}
-              <div className="rounded-2xl border border-brand-beige-300 bg-white/70 overflow-hidden">
-                <button
-                  onClick={() => setActiveAccordion(activeAccordion === "care" ? null : "care")}
-                  className="flex w-full items-center justify-between p-4 text-xs font-semibold text-brand-brown"
-                >
-                  <span className="flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-brand-sage-700" />
-                    <span>Care Guide (Keepsake Lifespan)</span>
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 transition-transform ${
-                      activeAccordion === "care" ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {activeAccordion === "care" && (
-                  <div className="p-4 pt-0 space-y-2 text-xs text-brand-brown-600 border-t border-brand-beige-100">
-                    <p>• <strong>No Water Needed:</strong> Preserved florals do not require hydration.</p>
-                    <p>• <strong>Keep Indoors:</strong> Avoid prolonged direct midday sun to maintain petal vibrancy.</p>
-                    <p>• <strong>Lifespan:</strong> Designed to look pristine for 2 to 5+ years.</p>
-                  </div>
-                )}
+              <div className="flex items-center gap-2">
+                <Truck className="h-4 w-4 text-brand-brown" /> Delivery arranged
               </div>
             </div>
-          </div>
+          </section>
         </div>
 
-        {/* Related Products Section */}
-        {relatedProducts.length > 0 && (
-          <div className="mt-20 pt-12 border-t border-brand-beige-300">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <Badge variant="pink">More from this collection</Badge>
-                <Heading as="h3" size="lg" className="font-serif mt-1">
-                  You Might Also Cherish
-                </Heading>
-              </div>
-              <Link href="/shop" className="text-xs font-semibold text-brand-brown hover:underline">
-                View All Gifts
-              </Link>
+        <section className="mt-16 border-t pt-12" id="reviews">
+          <div className="mb-7 flex items-end justify-between">
+            <div>
+              <Badge variant="pink">Customer love</Badge>
+              <Heading as="h2" size="lg" className="mt-2">
+                Reviews for {product.name}
+              </Heading>
             </div>
-
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {relatedProducts.map((rel) => (
-                <Link
-                  key={rel.id}
-                  href={`/products/${rel.slug}`}
-                  className="group flex flex-col overflow-hidden rounded-3xl border border-brand-beige-300 bg-white p-4 shadow-card hover:shadow-elevated transition-all"
-                >
-                  <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-brand-cream-100 mb-3">
-                    <Image
-                      src={rel.images[0]?.url || ""}
-                      alt={rel.name}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+            <RatingSummary rating={averageRating} count={reviewCount} />
+          </div>
+          {product.reviews.length ? (
+            <div className="grid gap-5 md:grid-cols-2">
+              {product.reviews.map((review) => (
+                <article key={review.id} className="rounded-3xl border bg-white p-6 shadow-card">
+                  <RatingSummary rating={review.rating} count={1} />
+                  <p className="mt-4 font-serif text-base italic leading-relaxed">
+                    &ldquo;{review.body}&rdquo;
+                  </p>
+                  <div className="mt-5 border-t pt-3 text-xs">
+                    <strong>{review.reviewerName}</strong>
+                    <span className="ml-2 text-brand-brown-400">
+                      {formatDate(review.createdAt)}
+                    </span>
                   </div>
-                  <Heading as="h4" size="sm" className="font-serif text-brand-brown">
-                    {rel.name}
-                  </Heading>
-                  <span className="font-serif text-sm font-bold text-brand-brown mt-1">
-                    {formatCurrency(rel.basePrice)}
-                  </span>
-                </Link>
+                </article>
               ))}
             </div>
+          ) : (
+            <p className="rounded-3xl border bg-white/60 p-8 text-center text-sm text-brand-brown-500">
+              No approved reviews yet. Be the first to share your experience.
+            </p>
+          )}
+          <div className="mt-6">
+            <Link
+              href={`/reviews?product=${product.id}`}
+              className="text-sm font-semibold text-brand-brown underline underline-offset-4"
+            >
+              Write a review
+            </Link>
           </div>
+        </section>
+
+        {related.length > 0 && (
+          <section className="mt-16 border-t pt-12">
+            <Heading as="h2" size="lg" className="mb-7">
+              More from this collection
+            </Heading>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          </section>
         )}
       </Container>
     </div>

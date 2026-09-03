@@ -16,8 +16,8 @@ export function FloatingPetals3D({ count = 16, reducedMotion = false }: Floating
   const petalData = useMemo(() => {
     return Array.from({ length: count }).map((_, i) => ({
       id: i,
-      x: (Math.sin(i * 1.7) * 4) + (i % 2 === 0 ? 0.5 : -0.5),
-      y: (Math.cos(i * 1.3) * 3),
+      x: Math.sin(i * 1.7) * 4 + (i % 2 === 0 ? 0.5 : -0.5),
+      y: Math.cos(i * 1.3) * 3,
       z: -1 + (i % 5) * 0.5,
       scale: 0.4 + (i % 4) * 0.15,
       rotationSpeed: 0.2 + (i % 3) * 0.15,
@@ -49,12 +49,7 @@ export function FloatingPetals3D({ count = 16, reducedMotion = false }: Floating
       {petalData.map((p) => (
         <mesh key={p.id} position={[p.x, p.y, p.z]} scale={p.scale}>
           <cylinderGeometry args={[0.08, 0.02, 0.2, 8]} />
-          <meshStandardMaterial
-            color={p.color}
-            roughness={0.6}
-            transparent
-            opacity={0.75}
-          />
+          <meshStandardMaterial color={p.color} roughness={0.6} transparent opacity={0.75} />
         </mesh>
       ))}
     </group>

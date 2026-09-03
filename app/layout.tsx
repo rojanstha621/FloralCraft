@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { CartProvider } from "@/lib/store/cart-context";
-import { CartDrawer } from "@/components/cart/cart-drawer";
+import { SiteShell } from "@/components/layout/site-shell";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -53,9 +50,11 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://petalcraftflorals.com"),
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Petal Craft Florals — Handmade Gifts in Kathmandu",
-    description: "More than just flowers... it's a feeling. Custom handmade floral keepsakes that preserve your cherished moments.",
+    description:
+      "More than just flowers... it's a feeling. Custom handmade floral keepsakes that preserve your cherished moments.",
     url: "/",
     siteName: "Petal Craft Florals",
     locale: "en_NP",
@@ -64,7 +63,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Petal Craft Florals — Handmade Keepsakes",
-    description: "Handcrafted floral gifts made to preserve the moments and people you never want to forget.",
+    description:
+      "Handcrafted floral gifts made to preserve the moments and people you never want to forget.",
   },
   robots: {
     index: true,
@@ -79,13 +79,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${cormorant.variable} ${jakarta.variable} scroll-smooth`}>
-      <body className="min-h-screen flex flex-col bg-brand-cream text-brand-brown bg-paper-texture antialiased selection:bg-brand-pink-200">
-        <CartProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <CartDrawer />
-        </CartProvider>
+      <body className="bg-paper-texture flex min-h-screen flex-col bg-brand-cream text-brand-brown antialiased selection:bg-brand-pink-200">
+        <SiteShell>{children}</SiteShell>
       </body>
     </html>
   );

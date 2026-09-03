@@ -1,53 +1,29 @@
-# Development & Contribution Guide
+# Development
 
-## 1. Local Environment Setup
-
-### Environment Variables
-Duplicate `.env.example` to `.env`:
-```bash
-cp .env.example .env
-```
-
-Key environment configurations:
-- `DATABASE_URL`: Connection string to PostgreSQL instance.
-- `PAYMENT_MOCK_MODE`: Set to `true` for local development. This enables instant sandbox testing without external API credentials.
-- `STORAGE_PROVIDER`: Set to `local` to save user uploads into `public/uploads`.
-
----
-
-## 2. Common Scripts
+## Commands
 
 ```bash
-# Start local development server on port 3000
 npm run dev
-
-# Run TypeScript type-checker and production build
 npm run build
-
-# Run ESLint validation
-npm run lint
-
-# Format codebase with Prettier
-npm run format
-
-# Verify formatting without modifying
 npm run format:check
-
-# Generate Prisma client bindings
 npm run db:generate
-
-# Push schema changes directly to development database
 npm run db:push
+npm run db:seed
 ```
 
----
+## Conventions
 
-## 3. Coding Guidelines & Quality Standards
+- Keep TypeScript strict and avoid `any`.
+- Use existing brand tokens instead of arbitrary colors, except official third-party brand colors where needed.
+- Preserve semantic markup, visible focus styles, descriptive image text, and 44px mobile tap targets.
+- Validate every public write on the server.
+- Never expose unapproved reviews from public routes.
+- Keep social content manual or use official platform APIs; do not scrape.
+- Keep WebGL optional and confined to genuinely useful visual enhancement.
 
-1. **TypeScript Strict Mode**: Avoid using `any`. Define strong interfaces in `@/types` or adjacent module files.
-2. **Design Tokens**: Do not use arbitrary hardcoded hex codes. Utilize Tailwind brand tokens (`bg-brand-pink`, `text-brand-brown`, `bg-brand-cream`, etc.).
-3. **Accessibility**:
-   - Ensure all interactive elements have visible focus outlines.
-   - All images must include descriptive `alt` text.
-   - Use semantic HTML tags (`<nav>`, `<header>`, `<main>`, `<footer>`, `<section>`).
-4. **Validation**: All user inputs (forms, API request bodies) must be validated with Zod schemas both on the client and server.
+## Before release
+
+- Confirm the WhatsApp number and social profile URLs.
+- Replace sample catalog/social photography with approved brand assets.
+- Moderate any pending reviews.
+- Run a production build and test 360, 390, 430, 768, 1024, and 1440px widths.

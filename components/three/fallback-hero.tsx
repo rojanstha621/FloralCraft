@@ -8,7 +8,7 @@ export function FallbackHero() {
       {/* Outer Luxury Wooden Frame Simulation */}
       <div className="relative flex h-full w-full flex-col items-center justify-between rounded-2xl border-4 border-brand-brown-600 bg-brand-cream-50 p-6 shadow-inner">
         {/* Decorative corner botanical badge */}
-        <div className="absolute -top-3 -right-3 flex h-10 w-10 items-center justify-center rounded-full border border-brand-sage/50 bg-brand-sage-100 text-brand-sage-800 shadow-sm">
+        <div className="absolute -right-3 -top-3 flex h-10 w-10 items-center justify-center rounded-full border border-brand-sage/50 bg-brand-sage-100 text-brand-sage-800 shadow-sm">
           <Sparkles className="h-4 w-4" />
         </div>
 
@@ -23,20 +23,20 @@ export function FallbackHero() {
             priority
           />
           {/* Preserved Flower Overlay Accent */}
-          <div className="absolute bottom-2 left-2 rounded-lg bg-brand-brown/80 px-2 py-1 text-[10px] font-medium text-brand-cream backdrop-blur-xs">
+          <div className="backdrop-blur-xs absolute bottom-2 left-2 rounded-lg bg-brand-brown/80 px-2 py-1 text-[10px] font-medium text-brand-cream">
             Preserved Florals
           </div>
         </div>
 
         {/* Heartfelt Calligraphy Card */}
-        <div className="w-full text-center space-y-1 pt-3">
-          <p className="font-serif text-lg font-semibold text-brand-brown leading-tight">
+        <div className="w-full space-y-1 pt-3 text-center">
+          <p className="font-serif text-lg font-semibold leading-tight text-brand-brown">
             Forever Cherished
           </p>
-          <p className="text-[11px] italic text-brand-brown-500 font-serif">
+          <p className="font-serif text-[11px] italic text-brand-brown-500">
             &ldquo;More than just flowers... it&apos;s a feeling.&rdquo;
           </p>
-          <div className="pt-1 flex items-center justify-center gap-1 text-[10px] tracking-wider uppercase text-brand-sage-700">
+          <div className="flex items-center justify-center gap-1 pt-1 text-[10px] uppercase tracking-wider text-brand-sage-700">
             <Heart className="h-3 w-3 fill-brand-pink text-brand-pink" />
             <span>Kathmandu Handmade</span>
           </div>

@@ -1,297 +1,223 @@
 "use client";
 
-import React, { useState } from "react";
-import Image from "next/image";
+import React, { FormEvent, useEffect, useState } from "react";
+import Link from "next/link";
+import { CheckCircle2, Star } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, CheckCircle2, Quote, Plus, X, Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CatalogProduct } from "@/lib/types/catalog";
+import { formatDate } from "@/lib/utils";
 
-interface CustomerReview {
+interface PublicReview {
   id: string;
-  author: string;
-  location: string;
+  reviewerName: string;
   rating: number;
-  date: string;
-  product: string;
-  comment: string;
-  imageUrl?: string;
-  isVerified: boolean;
+  body: string;
+  createdAt: string;
+  product: { name: string; slug: string };
 }
 
-const INITIAL_REVIEWS: CustomerReview[] = [
-  {
-    id: "rev-1",
-    author: "Prashant & Shreya",
-    location: "Jhamsikhel, Lalitpur",
-    rating: 5,
-    date: "February 2025",
-    product: "Our Story Customized Keepsake",
-    comment:
-      "I ordered this for our 2nd anniversary and my wife was genuinely moved to tears. The preserved flowers look so fresh and delicate, and the photo printing was crystal clear. Unboxing felt like a royal boutique experience!",
-    imageUrl: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
-    isVerified: true,
-  },
-  {
-    id: "rev-2",
-    author: "Aayushma Sharma",
-    location: "Lazimpat, Kathmandu",
-    rating: 5,
-    date: "January 2025",
-    product: "Dear Mom Preserved Rose Shadowbox",
-    comment:
-      "Gifting flowers in Nepal usually means they wilt in 3 days. Petal Craft completely changed that. My mom has kept this on her bedside table for months now. Exceptional craftsmanship.",
-    imageUrl: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=800&auto=format&fit=crop",
-    isVerified: true,
-  },
-  {
-    id: "rev-3",
-    author: "Rohan Manandhar",
-    location: "Suryabinayak, Bhaktapur",
-    rating: 5,
-    date: "Valentine's Week 2025",
-    product: "Forever Bloom Botanical Frame",
-    comment:
-      "Super seamless delivery in Kathmandu Valley and payment with eSewa was instant. The wax seal packaging made it feel like a handcrafted heirloom.",
-    isVerified: true,
-  },
-  {
-    id: "rev-4",
-    author: "Sneha Tuladhar",
-    location: "Baneshwor, Kathmandu",
-    rating: 5,
-    date: "December 2024",
-    product: "With Gratitude Floral Glass Dome",
-    comment:
-      "Ordered this as a farewell gift for our mentor. The glass bell jar with dried wildflowers looks magical under desk lights. Highly recommended!",
-    imageUrl: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop",
-    isVerified: true,
-  },
-];
-
 export default function ReviewsPage() {
-  const [reviews, setReviews] = useState<CustomerReview[]>(INITIAL_REVIEWS);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [author, setAuthor] = useState("");
-  const [location, setLocation] = useState("Kathmandu");
-  const [product, setProduct] = useState("Custom Floral Keepsake");
-  const [rating, setRating] = useState(5);
-  const [comment, setComment] = useState("");
-  const [submittedMessage, setSubmittedMessage] = useState(false);
+  const [reviews, setReviews] = useState<PublicReview[]>([]);
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [productId, setProductId] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!author || !comment) return;
+  useEffect(() => {
+    setProductId(new URLSearchParams(window.location.search).get("product") || "");
+    Promise.all([
+      fetch("/api/reviews").then((res) => res.json()),
+      fetch("/api/products").then((res) => res.json()),
+    ]).then(([reviewData, productData]) => {
+      if (reviewData.success) setReviews(reviewData.reviews);
+      if (productData.success) setProducts(productData.products);
+    });
+  }, []);
 
-    const newRev: CustomerReview = {
-      id: `rev-${Date.now()}`,
-      author,
-      location,
-      rating,
-      date: "Just now",
-      product,
-      comment,
-      isVerified: false,
-    };
-
-    setReviews([newRev, ...reviews]);
-    setSubmittedMessage(true);
-    setTimeout(() => {
-      setIsModalOpen(false);
-      setSubmittedMessage(false);
-      setAuthor("");
-      setComment("");
-    }, 1800);
-  };
+  async function submitReview(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus("sending");
+    const formElement = event.currentTarget;
+    const data = new FormData(formElement);
+    const response = await fetch("/api/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productId: data.get("productId"),
+        name: data.get("name"),
+        email: data.get("email"),
+        rating: Number(data.get("rating")),
+        comment: data.get("comment"),
+        website: data.get("website"),
+      }),
+    });
+    const result = await response.json();
+    setMessage(result.message);
+    setStatus(response.ok ? "success" : "error");
+    if (response.ok) formElement.reset();
+  }
 
   return (
-    <div className="py-12 md:py-20">
+    <div className="py-10 md:py-16">
       <Container size="xl">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <div className="space-y-3">
-            <Badge variant="pink">Verified Stories</Badge>
-            <Heading as="h1" size="2xl" className="font-serif">
-              Customer Reviews &amp; Love Notes
-            </Heading>
-            <Text size="base" variant="muted" className="max-w-xl">
-              Read how Petal Craft keepsakes have brought smiles, tears of joy, and lasting memories to loved ones across Nepal.
-            </Text>
-          </div>
+        <header className="mx-auto mb-12 max-w-2xl space-y-3 text-center">
+          <Badge variant="pink">Customer stories</Badge>
+          <Heading as="h1" size="2xl">
+            Love notes from our community
+          </Heading>
+          <Text size="base" variant="muted">
+            Real words about gifts that made birthdays, anniversaries, and everyday moments feel
+            unforgettable.
+          </Text>
+        </header>
 
-          <Button
-            variant="primary"
-            size="md"
-            className="gap-2 shrink-0"
-            onClick={() => setIsModalOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-            <span>Write a Review</span>
-          </Button>
-        </div>
-
-        {/* Reviews Grid */}
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {reviews.map((rev) => (
-            <div
-              key={rev.id}
-              className="relative flex flex-col justify-between rounded-3xl border border-brand-beige-300 bg-white p-8 shadow-card"
-            >
-              <Quote className="absolute top-6 right-6 h-8 w-8 text-brand-pink-200/50" />
-
-              <div className="space-y-4">
-                {/* Stars */}
-                <div className="flex items-center space-x-1 text-amber-500">
-                  {Array.from({ length: rev.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-
-                <p className="font-serif text-sm italic leading-relaxed text-brand-brown/90">
-                  &ldquo;{rev.comment}&rdquo;
-                </p>
-
-                {rev.imageUrl && (
-                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-brand-beige-300 bg-brand-cream-100 mt-2">
-                    <Image
-                      src={rev.imageUrl}
-                      alt={`Review by ${rev.author}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-brand-beige-200 flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-1.5 font-bold text-xs text-brand-brown">
-                    <span>{rev.author}</span>
-                    {rev.isVerified && <CheckCircle2 className="h-3.5 w-3.5 text-brand-sage-700" />}
-                  </div>
-                  <span className="text-[10px] text-brand-brown-400">
-                    {rev.location} • {rev.product}
-                  </span>
-                </div>
-                <span className="text-[10px] text-brand-brown-400">{rev.date}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Modal: Write a Review */}
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-brown-900/50 backdrop-blur-xs animate-fadeIn">
-            <div className="w-full max-w-md rounded-3xl border border-brand-beige-300 bg-white p-6 md:p-8 shadow-2xl space-y-5">
-              <div className="flex items-center justify-between border-b border-brand-beige-200 pb-3">
-                <h3 className="font-serif font-bold text-lg text-brand-brown">
-                  Share Your Petal Craft Experience
-                </h3>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-full p-1 text-brand-brown-400 hover:bg-brand-cream-200"
+        <div className="grid gap-10 lg:grid-cols-12">
+          <section className="space-y-5 lg:col-span-7" aria-label="Approved customer reviews">
+            {reviews.length ? (
+              reviews.map((review) => (
+                <article
+                  key={review.id}
+                  className="rounded-3xl border bg-white p-6 shadow-card md:p-8"
                 >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {submittedMessage ? (
-                <div className="text-center py-6 space-y-2">
-                  <Heart className="h-10 w-10 text-brand-pink-500 fill-brand-pink-300 mx-auto" />
-                  <h4 className="font-serif text-lg font-bold text-brand-brown">
-                    Thank You!
-                  </h4>
-                  <p className="text-xs text-brand-brown-500">
-                    Your review has been submitted to our Kathmandu studio moderation queue.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-medium text-brand-brown mb-1">
-                      Your Name *
-                    </label>
-                    <Input
-                      placeholder="e.g. Suman Shakya"
-                      value={author}
-                      onChange={(e) => setAuthor(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-brand-brown mb-1">
-                        Location
-                      </label>
-                      <Input
-                        placeholder="Kathmandu"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
+                  <div className="flex text-amber-500">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Star
+                        key={index}
+                        className={`h-4 w-4 ${index < review.rating ? "fill-amber-400" : ""}`}
                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-brand-brown mb-1">
-                        Rating (1-5)
-                      </label>
-                      <select
-                        value={rating}
-                        onChange={(e) => setRating(Number(e.target.value))}
-                        className="h-11 w-full rounded-2xl border border-brand-beige-400/60 bg-white px-3 text-sm text-brand-brown"
-                      >
-                        <option value={5}>★★★★★ (5 Stars)</option>
-                        <option value={4}>★★★★☆ (4 Stars)</option>
-                        <option value={3}>★★★☆☆ (3 Stars)</option>
-                      </select>
-                    </div>
+                    ))}
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-brand-brown mb-1">
-                      Product Name
-                    </label>
-                    <Input
-                      value={product}
-                      onChange={(e) => setProduct(e.target.value)}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-brand-brown mb-1">
-                      Your Feedback / Story *
-                    </label>
-                    <Textarea
-                      placeholder="How did your recipient react when unboxing their keepsake?"
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      required
-                      className="min-h-[90px]"
-                    />
-                  </div>
-
-                  <div className="pt-2 flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setIsModalOpen(false)}
+                  <p className="mt-4 font-serif text-lg italic leading-relaxed">
+                    &ldquo;{review.body}&rdquo;
+                  </p>
+                  <div className="mt-5 flex flex-wrap items-center gap-2 border-t pt-4 text-xs">
+                    <strong>{review.reviewerName}</strong>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-sage-700" />
+                    <Link
+                      href={`/products/${review.product.slug}`}
+                      className="text-brand-brown-500 underline"
                     >
-                      Cancel
-                    </Button>
-                    <Button type="submit" variant="primary" size="sm">
-                      Submit Review
-                    </Button>
+                      {review.product.name}
+                    </Link>
+                    <span className="ml-auto text-brand-brown-400">
+                      {formatDate(review.createdAt)}
+                    </span>
                   </div>
-                </form>
+                </article>
+              ))
+            ) : (
+              <div className="rounded-3xl border bg-white/70 p-10 text-center text-sm text-brand-brown-500">
+                Approved customer stories will appear here soon.
+              </div>
+            )}
+          </section>
+
+          <aside className="lg:col-span-5">
+            <form
+              onSubmit={submitReview}
+              className="sticky top-32 space-y-5 rounded-3xl border bg-white p-6 shadow-card md:p-8"
+            >
+              <div>
+                <Heading as="h2" size="md">
+                  Share your experience
+                </Heading>
+                <Text size="xs" variant="muted" className="mt-1">
+                  Reviews are checked before publishing. No account is required.
+                </Text>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold" htmlFor="review-product">
+                  Product *
+                </label>
+                <select
+                  id="review-product"
+                  name="productId"
+                  required
+                  value={productId}
+                  onChange={(event) => setProductId(event.target.value)}
+                  className="h-11 w-full rounded-2xl border border-brand-beige-400/60 bg-white px-3 text-sm"
+                >
+                  <option value="">Choose a keepsake</option>
+                  {products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold" htmlFor="review-name">
+                  Name *
+                </label>
+                <Input id="review-name" name="name" required minLength={2} maxLength={80} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold" htmlFor="review-email">
+                  Email{" "}
+                  <span className="font-normal text-brand-brown-400">
+                    (optional, not published)
+                  </span>
+                </label>
+                <Input id="review-email" name="email" type="email" />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold" htmlFor="review-rating">
+                  Rating *
+                </label>
+                <select
+                  id="review-rating"
+                  name="rating"
+                  defaultValue="5"
+                  className="h-11 w-full rounded-2xl border border-brand-beige-400/60 bg-white px-3 text-sm"
+                >
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <option key={rating} value={rating}>
+                      {rating} star{rating === 1 ? "" : "s"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold" htmlFor="review-comment">
+                  Your review *
+                </label>
+                <Textarea
+                  id="review-comment"
+                  name="comment"
+                  required
+                  minLength={10}
+                  maxLength={1200}
+                  className="min-h-32"
+                />
+              </div>
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                className="hidden"
+                aria-hidden="true"
+              />
+              {status !== "idle" && (
+                <p
+                  role="status"
+                  className={`text-xs ${status === "error" ? "text-red-700" : "text-brand-sage-800"}`}
+                >
+                  {status === "sending" ? "Submitting..." : message}
+                </p>
               )}
-            </div>
-          </div>
-        )}
+              <Button type="submit" size="lg" className="w-full" disabled={status === "sending"}>
+                Submit review
+              </Button>
+            </form>
+          </aside>
+        </div>
       </Container>
     </div>
   );

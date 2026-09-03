@@ -22,12 +22,13 @@ export default function ErrorBoundary({
   return (
     <div className="flex min-h-[60vh] items-center justify-center py-16">
       <Container size="sm">
-        <div className="rounded-3xl border border-brand-pink-300/80 bg-white/90 p-8 md:p-12 text-center space-y-5 shadow-card">
+        <div className="space-y-5 rounded-3xl border border-brand-pink-300/80 bg-white/90 p-8 text-center shadow-card md:p-12">
           <Heading as="h1" size="xl" className="text-brand-brown">
             Something unexpected occurred
           </Heading>
-          <Text size="sm" variant="muted" className="max-w-md mx-auto">
-            We encountered an issue while rendering this page. Please try refreshing or contact our team in Kathmandu.
+          <Text size="sm" variant="muted" className="mx-auto max-w-md">
+            We encountered an issue while rendering this page. Please try refreshing or contact our
+            team in Kathmandu.
           </Text>
           <div className="flex justify-center gap-4 pt-3">
             <Button variant="primary" onClick={() => reset()}>

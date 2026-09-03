@@ -18,15 +18,15 @@ export function Heading({
   return (
     <Component
       className={cn(
-        "font-serif tracking-tight text-brand-brown font-normal",
+        "font-serif font-normal tracking-tight text-brand-brown",
         italic && "italic",
-        size === "hero" && "text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.08]",
-        size === "2xl" && "text-3xl sm:text-4xl md:text-5xl leading-tight",
-        size === "xl" && "text-2xl sm:text-3xl md:text-4xl leading-snug",
-        size === "lg" && "text-xl sm:text-2xl md:text-3xl leading-snug",
-        size === "md" && "text-lg sm:text-xl md:text-2xl leading-normal",
-        size === "sm" && "text-base sm:text-lg font-medium",
-        size === "xs" && "text-sm font-medium tracking-wide uppercase",
+        size === "hero" && "text-4xl leading-[1.08] sm:text-5xl md:text-6xl lg:text-7xl",
+        size === "2xl" && "text-3xl leading-tight sm:text-4xl md:text-5xl",
+        size === "xl" && "text-2xl leading-snug sm:text-3xl md:text-4xl",
+        size === "lg" && "text-xl leading-snug sm:text-2xl md:text-3xl",
+        size === "md" && "text-lg leading-normal sm:text-xl md:text-2xl",
+        size === "sm" && "text-base font-medium sm:text-lg",
+        size === "xs" && "text-sm font-medium uppercase tracking-wide",
         className
       )}
       {...props}

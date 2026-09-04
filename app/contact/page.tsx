@@ -9,10 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { WhatsAppButton } from "@/components/ui/whatsapp-button";
-import { BUSINESS, createWhatsAppUrl } from "@/lib/config/business";
+import { createWhatsAppUrl } from "@/lib/config/business";
 import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { useBusinessSettings } from "@/components/providers/business-provider";
 
 export default function ContactPage() {
+  const business = useBusinessSettings();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -20,15 +22,19 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !message) return;
-    const inquiry = `Hi Petal Craft Florals 🌸\n\nMy name is ${name}.${phone ? `\nPhone: ${phone}` : ""}${email ? `\nEmail: ${email}` : ""}\n\n${message}`;
-    window.open(createWhatsAppUrl(inquiry), "_blank", "noopener,noreferrer");
+    const inquiry = `Hi ${business.name} 🌸\n\nMy name is ${name}.${phone ? `\nPhone: ${phone}` : ""}${email ? `\nEmail: ${email}` : ""}\n\n${message}`;
+    window.open(
+      createWhatsAppUrl(inquiry, business.whatsappNumber),
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   return (
-    <div className="py-12 md:py-20">
+    <main className="public-editorial-page contact-page">
       <Container size="xl">
         {/* Header */}
-        <div className="mb-14 space-y-3 text-center">
+        <header className="editorial-page-header mb-14 space-y-3 text-center">
           <Badge variant="pink">Kathmandu Studio</Badge>
           <Heading as="h1" size="2xl" className="font-serif">
             Get in Touch with Our Artisans
@@ -37,7 +43,7 @@ export default function ContactPage() {
             Have questions about custom framing, bulk corporate gifting, or urgent anniversary
             deliveries? We would love to hear from you.
           </Text>
-        </div>
+        </header>
 
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           {/* Left Studio Information */}
@@ -54,11 +60,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-brand-brown">Artisan Workshop &amp; Studio</h4>
-                    <p className="mt-0.5 text-brand-brown-500">
-                      Jhamsikhel, Lalitpur (Near St. Mary&apos;s High School Road)
-                      <br />
-                      Kathmandu Valley, Nepal
-                    </p>
+                    <p className="mt-0.5 text-brand-brown-500">{business.address}</p>
                   </div>
                 </div>
 
@@ -68,7 +70,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-brand-brown">Phone / Mobile</h4>
-                    <p className="mt-0.5 text-brand-brown-500">{BUSINESS.phoneDisplay}</p>
+                    <p className="mt-0.5 text-brand-brown-500">{business.phoneDisplay}</p>
                   </div>
                 </div>
 
@@ -78,7 +80,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-brand-brown">Email Support</h4>
-                    <p className="mt-0.5 text-brand-brown-500">{BUSINESS.email}</p>
+                    <p className="mt-0.5 text-brand-brown-500">{business.email}</p>
                   </div>
                 </div>
 
@@ -89,9 +91,7 @@ export default function ContactPage() {
                   <div>
                     <h4 className="font-bold text-brand-brown">Opening Hours</h4>
                     <p className="mt-0.5 text-brand-brown-500">
-                      Sunday – Friday: 10:00 AM – 6:30 PM
-                      <br />
-                      Saturday: 11:00 AM – 4:00 PM
+                      {business.openingHours || "Contact the studio for today’s hours."}
                     </p>
                   </div>
                 </div>
@@ -178,6 +178,6 @@ export default function ContactPage() {
           </div>
         </div>
       </Container>
-    </div>
+    </main>
   );
 }

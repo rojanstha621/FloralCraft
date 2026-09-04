@@ -1,9 +1,12 @@
+"use client";
+
 import React from "react";
 import { MessageCircle } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { createProductWhatsAppMessage, createWhatsAppUrl } from "@/lib/config/business";
 import { formatCurrency } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { useBusinessSettings } from "@/components/providers/business-provider";
 
 interface WhatsAppButtonProps {
   productName?: string;
@@ -22,6 +25,8 @@ export function WhatsAppButton({
   size = "lg",
   className,
 }: WhatsAppButtonProps) {
+  const business = useBusinessSettings();
+  if (!business.whatsappOrderingEnabled) return null;
   const productMessage =
     productName && price !== undefined
       ? createProductWhatsAppMessage(productName, formatCurrency(price))
@@ -29,7 +34,7 @@ export function WhatsAppButton({
 
   return (
     <a
-      href={createWhatsAppUrl(message || productMessage)}
+      href={createWhatsAppUrl(message || productMessage, business.whatsappNumber)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(

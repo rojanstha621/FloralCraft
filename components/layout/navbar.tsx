@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { createWhatsAppUrl } from "@/lib/config/business";
+import { useBusinessSettings } from "@/components/providers/business-provider";
 
 const NAV_LINKS = [
   { href: "/collections", label: "Collections" },
@@ -23,6 +24,7 @@ export function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const business = useBusinessSettings();
   const isHome = pathname === "/";
 
   useEffect(() => {
@@ -76,15 +78,17 @@ export function Navbar() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden items-center space-x-7 md:flex" aria-label="Main Navigation">
-            {NAV_LINKS.map((link) => {
+          <nav className="hidden items-center gap-6 md:flex lg:gap-8" aria-label="Main Navigation">
+            {NAV_LINKS.filter(
+              (link) => link.href !== "/order" || business.websiteOrderingEnabled
+            ).map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "relative py-2 text-[13px] font-semibold tracking-wide transition-colors duration-200 after:absolute after:inset-x-0 after:-bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-brand-pink-600 after:transition-transform hover:text-brand-brown hover:after:scale-x-100",
+                    "relative py-3 text-[12px] font-semibold tracking-[.055em] transition-colors duration-300 after:absolute after:inset-x-0 after:bottom-1 after:h-px after:origin-left after:scale-x-0 after:bg-brand-pink-600 after:transition-transform after:duration-300 hover:text-brand-brown hover:after:scale-x-100",
                     isActive ? "text-brand-brown after:scale-x-100" : "text-brand-brown/75"
                   )}
                 >
@@ -96,16 +100,18 @@ export function Navbar() {
 
           {/* Right conversion action */}
           <div className="flex items-center space-x-3">
-            <a
-              href={createWhatsAppUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden lg:inline-flex"
-            >
-              <Button variant="primary" size="sm" className="gap-2" tabIndex={-1}>
-                <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
-              </Button>
-            </a>
+            {business.whatsappOrderingEnabled && (
+              <a
+                href={createWhatsAppUrl(undefined, business.whatsappNumber)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden lg:inline-flex"
+              >
+                <Button variant="primary" size="sm" className="gap-2" tabIndex={-1}>
+                  <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+                </Button>
+              </a>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -134,7 +140,9 @@ export function Navbar() {
       >
         <div className="overflow-hidden">
           <nav className="flex flex-col space-y-4 px-6 py-6">
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.filter(
+              (link) => link.href !== "/order" || business.websiteOrderingEnabled
+            ).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -145,16 +153,18 @@ export function Navbar() {
               </Link>
             ))}
             <div className="pt-4">
-              <a
-                href={createWhatsAppUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Button variant="primary" size="lg" className="w-full gap-2" tabIndex={-1}>
-                  <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
-                </Button>
-              </a>
+              {business.whatsappOrderingEnabled && (
+                <a
+                  href={createWhatsAppUrl(undefined, business.whatsappNumber)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Button variant="primary" size="lg" className="w-full gap-2" tabIndex={-1}>
+                    <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+                  </Button>
+                </a>
+              )}
             </div>
           </nav>
         </div>

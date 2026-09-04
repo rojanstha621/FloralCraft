@@ -1,12 +1,28 @@
 import Image from "next/image";
+import { isRenderableImageUrl } from "@/lib/media/image-url";
 import Link from "next/link";
+import { ClipboardList, Mail, MessageCircle, Phone } from "lucide-react";
 import prisma from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/guards";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { AdminShell, adminButton, adminCard, adminInput, adminTextarea } from "@/components/admin/admin-shell";
+import { AdminShell, adminInput, adminTextarea } from "@/components/admin/admin-shell";
+import { AdminSubmitButton } from "@/components/admin/form-controls";
 import { updateOrder } from "../actions";
 
-const statuses = ["NEW", "CONTACTED", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED"] as const;
+const statuses = [
+  "NEW",
+  "CONTACTED",
+  "CONFIRMED",
+  "IN_PROGRESS",
+  "COMPLETED",
+  "CANCELLED",
+] as const;
+const statusLabel = (status: string) =>
+  status
+    .toLowerCase()
+    .replaceAll("_", " ")
+    .replace(/^\w/, (letter) => letter.toUpperCase());
+
 export default async function AdminOrdersPage() {
   const session = await requireAdmin();
   const orders = await prisma.orderRequest.findMany({
@@ -25,36 +41,194 @@ export default async function AdminOrdersPage() {
     },
     orderBy: { createdAt: "desc" },
   });
-  return <AdminShell session={session} title="Orders" description="Track website and customization requests from first contact through completion.">
-    <div className="grid gap-5">{orders.length ? orders.map((order) => <article key={order.id} className={adminCard}>
-      <div className="flex flex-wrap justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-wider text-brand-sage-700">{order.requestNumber}</p><h2 className="mt-1 font-serif text-2xl font-semibold">{order.customerName}</h2><p className="mt-1 text-xs text-brand-brown-500">{order.customerPhone}{order.customerEmail ? ` · ${order.customerEmail}` : ""} · {formatDate(order.createdAt)}</p></div><span className="h-fit rounded-full bg-brand-pink-100 px-3 py-1 text-xs font-bold">{order.status.replace("_", " ")}</span></div>
-      <div className="mt-5 divide-y rounded-2xl border border-brand-beige-200 bg-brand-cream-100 px-4">
-        {order.items.map((item) => {
-          const image = item.product?.images[0];
-          const unitPrice = item.unitPriceSnapshot ? Number(item.unitPriceSnapshot) : null;
-          return <div key={item.id} className="grid gap-4 py-4 sm:grid-cols-[88px_1fr_auto]">
-            <div className="relative h-[88px] w-[88px] overflow-hidden rounded-xl border bg-white">
-              {image ? <Image src={image.url} alt={image.alt || item.productNameSnapshot} fill sizes="88px" className="object-cover" /> : <div className="flex h-full items-center justify-center px-2 text-center text-[10px] text-brand-brown-400">No image</div>}
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                {item.product ? <Link href={`/products/${item.product.slug}`} className="font-serif text-xl font-semibold underline decoration-brand-pink-300 underline-offset-4" target="_blank">{item.productNameSnapshot}</Link> : <strong className="font-serif text-xl">{item.productNameSnapshot}</strong>}
-                <span className="rounded-full bg-white px-2 py-1 text-[10px] font-bold">QTY {item.quantity}</span>
-              </div>
-              {item.product ? <p className="mt-1 text-xs text-brand-brown-500">{item.product.category.name} · {item.product.productType.name} · {item.product.available ? "Currently available" : "Currently unavailable"}</p> : <p className="mt-1 text-xs text-amber-700">Original product is no longer in the catalog; showing the order snapshot.</p>}
-              {item.product?.tagline && <p className="mt-2 text-sm text-brand-brown-600">{item.product.tagline}</p>}
-              {item.customization ? <div className="mt-3 flex flex-wrap gap-2">{Object.entries(item.customization as Record<string,string>).filter(([,value]) => value).map(([key,value]) => <span key={key} className="rounded-lg border bg-white px-2.5 py-1.5 text-xs"><strong className="capitalize">{key.replace(/-/g, " ")}:</strong> {value}</span>)}</div> : null}
-              {item.notes && <p className="mt-2 text-xs text-brand-brown-500"><strong>Item note:</strong> {item.notes}</p>}
-            </div>
-            <div className="text-left sm:text-right">
-              {unitPrice !== null && <><p className="font-semibold">{formatCurrency(unitPrice * item.quantity)}</p><p className="mt-1 text-[10px] text-brand-brown-400">{formatCurrency(unitPrice)} each</p></>}
-              {item.product && unitPrice !== null && Number(item.product.price) !== unitPrice && <p className="mt-2 text-[10px] text-amber-700">Current price: {formatCurrency(item.product.price)}</p>}
-            </div>
-          </div>;
-        })}
+  return (
+    <AdminShell
+      session={session}
+      title="Order requests"
+      description="Move every request from first contact to completion while keeping customer and product context together."
+    >
+      <div className="admin-order-counts">
+        {statuses.map((status) => (
+          <span key={status}>
+            <strong>{orders.filter((order) => order.status === status).length}</strong>
+            {statusLabel(status)}
+          </span>
+        ))}
       </div>
-      {order.notes && <p className="mt-4 text-sm text-brand-brown-600"><strong>Customer note:</strong> {order.notes}</p>}
-      <form action={updateOrder} className="mt-5 grid gap-3 border-t pt-5 md:grid-cols-[200px_1fr_auto]"><input type="hidden" name="id" value={order.id} /><select name="status" defaultValue={order.status} className={adminInput}>{statuses.map((status) => <option key={status}>{status}</option>)}</select><textarea name="adminNotes" defaultValue={order.adminNotes || ""} placeholder="Private admin notes" className={adminTextarea} /><button className={adminButton}>Save</button></form>
-    </article>) : <p className={`${adminCard} text-sm text-brand-brown-500`}>No order requests yet.</p>}</div>
-  </AdminShell>;
+      {orders.length ? (
+        <div className="admin-order-list">
+          {orders.map((order) => {
+            const baseTotal = order.items.reduce(
+              (sum, item) => sum + Number(item.unitPriceSnapshot || 0) * item.quantity,
+              0
+            );
+            const whatsappContext = `Hi, this is Petal Craft Florals regarding your order request ${order.requestNumber}.`;
+            return (
+              <article key={order.id} className="admin-card admin-order-card">
+                <header>
+                  <div>
+                    <p>{order.requestNumber}</p>
+                    <h2>{order.customerName}</h2>
+                    <span>
+                      Received {formatDate(order.createdAt)} · Preferred contact:{" "}
+                      {statusLabel(order.preferredChannel)}
+                    </span>
+                  </div>
+                  <span className={`admin-status admin-status-${order.status.toLowerCase()}`}>
+                    {statusLabel(order.status)}
+                  </span>
+                </header>
+                <div className="admin-contact-actions">
+                  <a href={`tel:${order.customerPhone}`}>
+                    <Phone aria-hidden="true" /> {order.customerPhone}
+                  </a>
+                  <a
+                    href={`https://wa.me/${order.customerPhone.replace(/\D/g, "")}?text=${encodeURIComponent(whatsappContext)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <MessageCircle aria-hidden="true" /> WhatsApp
+                  </a>
+                  {order.customerEmail && (
+                    <a href={`mailto:${order.customerEmail}`}>
+                      <Mail aria-hidden="true" /> {order.customerEmail}
+                    </a>
+                  )}
+                </div>
+                <div className="admin-order-items">
+                  {order.items.map((item) => {
+                    const image = item.product?.images[0];
+                    const unitPrice = item.unitPriceSnapshot
+                      ? Number(item.unitPriceSnapshot)
+                      : null;
+                    return (
+                      <div key={item.id} className="admin-order-item">
+                        <div className="admin-order-image">
+                          {image && isRenderableImageUrl(image.url) ? (
+                            <Image
+                              src={image.url}
+                              alt={image.alt || item.productNameSnapshot}
+                              fill
+                              sizes="86px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <ClipboardList aria-hidden="true" />
+                          )}
+                        </div>
+                        <div>
+                          <div>
+                            <h3>
+                              {item.product ? (
+                                <Link href={`/admin/products/${item.product.id}`}>
+                                  {item.productNameSnapshot}
+                                </Link>
+                              ) : (
+                                item.productNameSnapshot
+                              )}
+                            </h3>
+                            <span>Quantity {item.quantity}</span>
+                          </div>
+                          {item.product ? (
+                            <p>
+                              {item.product.productType.name} · {item.product.category.name} ·{" "}
+                              {item.product.available ? "Available" : "Currently unavailable"}
+                            </p>
+                          ) : (
+                            <p className="is-warning">
+                              The original product is no longer in the active catalog. The saved
+                              order snapshot is shown.
+                            </p>
+                          )}
+                          {item.customization && (
+                            <dl>
+                              {Object.entries(item.customization as Record<string, string>)
+                                .filter(([, value]) => value)
+                                .map(([key, value]) => (
+                                  <div key={key}>
+                                    <dt>{key.replaceAll("-", " ")}</dt>
+                                    <dd>{value}</dd>
+                                  </div>
+                                ))}
+                            </dl>
+                          )}
+                          {item.notes && (
+                            <p>
+                              <strong>Item note:</strong> {item.notes}
+                            </p>
+                          )}
+                        </div>
+                        <div className="admin-order-price">
+                          {unitPrice === null ? (
+                            "Price to confirm"
+                          ) : (
+                            <>
+                              <strong>{formatCurrency(unitPrice * item.quantity)}</strong>
+                              <small>{formatCurrency(unitPrice)} each</small>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="admin-order-context">
+                  <div>
+                    <span>Preferred delivery date</span>
+                    <strong>
+                      {order.desiredDate
+                        ? formatDate(order.desiredDate)
+                        : "Flexible / not provided"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Base subtotal</span>
+                    <strong>{formatCurrency(baseTotal)}</strong>
+                  </div>
+                  {order.notes && (
+                    <div className="admin-order-note">
+                      <span>Delivery and customer note</span>
+                      <pre>{order.notes}</pre>
+                    </div>
+                  )}
+                </div>
+                <form action={updateOrder} className="admin-order-update">
+                  <input type="hidden" name="id" value={order.id} />
+                  <label>
+                    <span>Request status</span>
+                    <select name="status" defaultValue={order.status} className={adminInput}>
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {statusLabel(status)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span>Private studio notes</span>
+                    <textarea
+                      name="adminNotes"
+                      maxLength={2000}
+                      defaultValue={order.adminNotes || ""}
+                      placeholder="Follow-up, deposit, timing, or production notes…"
+                      className={adminTextarea}
+                    />
+                  </label>
+                  <AdminSubmitButton pendingLabel="Updating request…">
+                    Update request
+                  </AdminSubmitButton>
+                </form>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="admin-empty admin-card">
+          <ClipboardList aria-hidden="true" />
+          <h3>No order requests yet</h3>
+          <p>Structured website requests will appear here.</p>
+        </div>
+      )}
+    </AdminShell>
+  );
 }

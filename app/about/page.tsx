@@ -10,10 +10,10 @@ import { Heart, Sparkles, Flower2, ArrowRight } from "lucide-react";
 
 export default function AboutPage() {
   return (
-    <div className="py-12 md:py-20">
+    <main className="public-editorial-page about-page">
       <Container size="xl">
         {/* Header */}
-        <div className="mb-16 space-y-4 text-center">
+        <header className="editorial-page-header mb-16 space-y-4 text-center">
           <Badge variant="pink">Our Studio Heritage</Badge>
           <Heading as="h1" size="hero" className="font-serif">
             More than just flowers... <br />
@@ -23,10 +23,10 @@ export default function AboutPage() {
             Founded with a passion for preserving life&apos;s quiet, tender moments, Petal Craft
             Florals turns genuine botanical wonders into timeless keepsakes.
           </Text>
-        </div>
+        </header>
 
         {/* 2-Column Story Section */}
-        <div className="mb-20 grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
+        <section className="about-story mb-20 grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-4xl border border-brand-beige-300 bg-brand-cream-100 shadow-card lg:col-span-5">
             <Image
               src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=800&auto=format&fit=crop"
@@ -64,10 +64,10 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Craftsmanship Pillars */}
-        <div className="mb-20 space-y-10 rounded-4xl border border-brand-beige-300 bg-white/80 p-8 shadow-card sm:p-14">
+        <section className="about-principles mb-20 space-y-10 border border-brand-beige-300 bg-white/80 p-8 shadow-card sm:p-14">
           <div className="space-y-2 text-center">
             <Heading as="h2" size="xl" className="font-serif">
               Our Artisan Principles
@@ -117,10 +117,10 @@ export default function AboutPage() {
               </Text>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* CTA */}
-        <div className="space-y-4 text-center">
+        <section className="editorial-page-cta space-y-4 text-center">
           <Heading as="h2" size="xl" className="font-serif">
             Ready to preserve a memory?
           </Heading>
@@ -132,8 +132,8 @@ export default function AboutPage() {
               </Button>
             </Link>
           </div>
-        </div>
+        </section>
       </Container>
-    </div>
+    </main>
   );
 }

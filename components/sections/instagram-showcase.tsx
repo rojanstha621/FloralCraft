@@ -1,13 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import { Instagram, Play } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Badge } from "@/components/ui/badge";
-import { BUSINESS } from "@/lib/config/business";
 import { SOCIAL_CONTENT } from "@/lib/data/social";
+import { useBusinessSettings } from "@/components/providers/business-provider";
 
 export function InstagramShowcase() {
+  const business = useBusinessSettings();
   return (
     <section className="home-instagram bg-[#f1e9df] py-24 sm:py-28">
       <Container size="xl">
@@ -28,7 +31,7 @@ export function InstagramShowcase() {
           </div>
           <div className="flex gap-3">
             <a
-              href={BUSINESS.instagramUrl}
+              href={business.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-11 items-center gap-2 border-b border-brand-brown/25 text-xs font-semibold"
@@ -36,7 +39,7 @@ export function InstagramShowcase() {
               <Instagram className="h-4 w-4" /> Instagram
             </a>
             <a
-              href={BUSINESS.tiktokUrl}
+              href={business.tiktokUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex min-h-11 items-center border-b border-brand-brown/25 text-xs font-semibold"
@@ -49,7 +52,7 @@ export function InstagramShowcase() {
           {SOCIAL_CONTENT.filter((item) => item.type === "story-link").map((item) => (
             <a
               key={item.id}
-              href={item.href}
+              href={business.instagramUrl || item.href}
               target="_blank"
               rel="noopener noreferrer"
               className="w-20 shrink-0 text-center"
@@ -70,7 +73,7 @@ export function InstagramShowcase() {
           {SOCIAL_CONTENT.map((item, index) => (
             <a
               key={item.id}
-              href={item.href}
+              href={business.instagramUrl || item.href}
               target="_blank"
               rel="noopener noreferrer"
               data-reveal="up"

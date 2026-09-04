@@ -19,7 +19,12 @@ export function FeaturedProducts() {
       .then((data) => {
         if (data.success)
           setProducts(
-            data.products.filter((product: CatalogProduct) => product.featured).slice(0, 6)
+            [...data.products]
+              .sort(
+                (a: CatalogProduct, b: CatalogProduct) =>
+                  +new Date(b.createdAt || 0) - +new Date(a.createdAt || 0)
+              )
+              .slice(0, 6)
           );
       })
       .catch(() => setProducts([]));
@@ -54,11 +59,12 @@ export function FeaturedProducts() {
           </Link>
         </div>
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="home-product-grid grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3 lg:gap-9">
             {products.map((product, index) => (
               <div
                 key={product.id}
                 data-reveal="up"
+                data-visible="true"
                 className={`h-full reveal-delay-${(index % 3) + 1}`}
               >
                 <ProductCard product={product} interactiveGallery editorialIndex={index + 1} />

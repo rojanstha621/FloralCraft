@@ -179,7 +179,7 @@ function FilterPanel({
 function CatalogLoading() {
   return (
     <div
-      className="grid grid-cols-1 gap-7 sm:grid-cols-2 xl:grid-cols-3"
+      className="catalog-product-grid grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
       aria-label="Loading products"
     >
       {Array.from({ length: 6 }).map((_, index) => (
@@ -472,7 +472,7 @@ export default function CollectionsPage() {
                   </Text>
                 </div>
               ) : visibleProducts.length > 0 ? (
-                <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="catalog-product-grid grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {visibleProducts.map((product, index) => (
                     <ProductCard
                       key={product.id}

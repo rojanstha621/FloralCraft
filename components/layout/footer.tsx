@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
@@ -5,9 +7,10 @@ import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Heart, Instagram, MapPin, Mail, Phone } from "lucide-react";
-import { BUSINESS } from "@/lib/config/business";
+import { useBusinessSettings } from "@/components/providers/business-provider";
 
 export function Footer() {
+  const business = useBusinessSettings();
   return (
     <footer className="border-t border-brand-beige-300/60 bg-brand-cream-100 pb-12 pt-16 text-brand-brown">
       <Container size="xl">
@@ -21,15 +24,15 @@ export function Footer() {
             </Text>
             <div className="flex items-center space-x-3 pt-2 text-xs text-brand-brown-600">
               <MapPin className="h-4 w-4 text-brand-sage-700" />
-              <span>Kathmandu, Nepal</span>
+              <span>{business.address}</span>
             </div>
             <div className="flex items-center space-x-3 text-xs text-brand-brown-600">
               <Phone className="h-4 w-4 text-brand-sage-700" />
-              <span>{BUSINESS.phoneDisplay}</span>
+              <span>{business.phoneDisplay}</span>
             </div>
             <div className="flex items-center space-x-3 text-xs text-brand-brown-600">
               <Mail className="h-4 w-4 text-brand-sage-700" />
-              <span>{BUSINESS.email}</span>
+              <span>{business.email}</span>
             </div>
           </div>
 
@@ -130,7 +133,7 @@ export function Footer() {
 
             <div className="flex items-center space-x-3 pt-2">
               <a
-                href={BUSINESS.instagramUrl}
+                href={business.instagramUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-beige-300 bg-white/60 text-brand-brown transition-colors hover:bg-brand-pink-100"
@@ -139,7 +142,7 @@ export function Footer() {
                 <Instagram className="h-4 w-4" />
               </a>
               <a
-                href={BUSINESS.tiktokUrl}
+                href={business.tiktokUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-beige-300 bg-white/60 text-brand-brown transition-colors hover:bg-brand-pink-100"

@@ -30,8 +30,8 @@ export function HeroSection() {
       <div className="hero-orb hero-orb-two" />
       <HeroBotanicalLayer />
 
-      <Container size="xl" className="relative pb-8 pt-12 sm:pt-16 lg:pb-10 lg:pt-20">
-        <div className="grid min-h-[720px] items-center gap-14 lg:grid-cols-[.96fr_1.04fr] lg:gap-10">
+      <Container size="xl" className="relative pb-7 pt-10 sm:pt-14 lg:pb-9 lg:pt-16">
+        <div className="hero-primary-grid grid min-h-[clamp(610px,76vh,760px)] items-center gap-12 lg:grid-cols-[minmax(0,.92fr)_minmax(0,1.08fr)] lg:gap-12">
           <div className="hero-copy relative z-10 text-center lg:text-left">
             <div className="hero-studio-line mb-8 inline-flex items-center gap-2 border-y border-brand-brown/15 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-brown-700">
               <Sparkles className="h-3.5 w-3.5 text-brand-pink-600" />
@@ -45,7 +45,7 @@ export function HeroSection() {
               </span>
             </h1>
 
-            <p className="mx-auto mt-8 max-w-xl text-[15px] leading-7 text-brand-brown-600 sm:text-base lg:mx-0">
+            <p className="mx-auto mt-7 max-w-[34rem] text-[15px] leading-7 text-brand-brown-600 sm:text-base lg:mx-0">
               Bespoke floral keepsakes designed around your photographs, words, and memories—made
               slowly, beautifully, and entirely for someone special.
             </p>

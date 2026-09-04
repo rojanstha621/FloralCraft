@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import { SiteShell } from "@/components/layout/site-shell";
+import { getPublicBusinessSettings } from "@/lib/data/business-settings";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -8,6 +9,7 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 const jakarta = Plus_Jakarta_Sans({
@@ -15,6 +17,7 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   weight: ["300", "400", "500", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 export const viewport: Viewport = {
@@ -72,15 +75,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const businessSettings = await getPublicBusinessSettings();
   return (
-    <html lang="en" className={`${cormorant.variable} ${jakarta.variable} scroll-smooth`}>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${cormorant.variable} ${jakarta.variable} scroll-smooth`}
+    >
       <body className="bg-paper-texture flex min-h-screen flex-col bg-brand-cream text-brand-brown antialiased selection:bg-brand-pink-200">
-        <SiteShell>{children}</SiteShell>
+        <SiteShell businessSettings={businessSettings}>{children}</SiteShell>
       </body>
     </html>
   );

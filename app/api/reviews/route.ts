@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db/prisma";
+import { readJsonBody, RequestBodyError } from "@/lib/security/request";
+import { checkRateLimit, clientAddress } from "@/lib/security/rate-limit";
 
 const reviewSchema = z.object({
   productId: z.string().min(1),
@@ -11,18 +13,6 @@ const reviewSchema = z.object({
   imageUrl: z.string().url().max(500).optional().or(z.literal("")),
   website: z.string().max(0).optional(),
 });
-
-const submissions = new Map<string, number[]>();
-const WINDOW_MS = 60 * 60 * 1000;
-const MAX_SUBMISSIONS = 3;
-
-function isRateLimited(key: string): boolean {
-  const now = Date.now();
-  const recent = (submissions.get(key) || []).filter((time) => now - time < WINDOW_MS);
-  if (recent.length >= MAX_SUBMISSIONS) return true;
-  submissions.set(key, [...recent, now]);
-  return false;
-}
 
 export async function GET(request: NextRequest) {
   const productId = request.nextUrl.searchParams.get("productId");
@@ -45,12 +35,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = reviewSchema.parse(await request.json());
-    const clientKey = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    if (isRateLimited(clientKey))
+    const payload = reviewSchema.parse(await readJsonBody(request, 16 * 1024));
+    const limit = checkRateLimit(`review:${clientAddress(request)}`, 3, 60 * 60 * 1000);
+    if (!limit.allowed)
       return NextResponse.json(
         { success: false, message: "Too many review submissions. Please try again later." },
-        { status: 429 }
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } }
       );
 
     const product = await prisma.product.findUnique({
@@ -77,6 +67,14 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof RequestBodyError)
+      return NextResponse.json(
+        {
+          success: false,
+          message: error.kind === "too_large" ? "Request is too large." : "Invalid request body.",
+        },
+        { status: 400 }
+      );
     if (error instanceof z.ZodError)
       return NextResponse.json(
         { success: false, message: error.errors[0]?.message || "Please check your review." },

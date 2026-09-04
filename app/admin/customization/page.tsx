@@ -1,17 +1,30 @@
+import Link from "next/link";
+import { Palette, Settings2, Trash2 } from "lucide-react";
 import prisma from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/guards";
-import { AdminShell, adminButton, adminCard, adminInput } from "@/components/admin/admin-shell";
-import { createCustomizationOption, toggleCustomizationOption } from "../actions";
+import { formatCurrency } from "@/lib/utils";
+import { AdminShell, adminInput, adminTextarea } from "@/components/admin/admin-shell";
+import { AdminSubmitButton, ConfirmButton } from "@/components/admin/form-controls";
+import {
+  createCustomizationOption,
+  deleteCustomizationOption,
+  updateCustomizationOption,
+} from "../actions";
 
-export default async function AdminCustomizationPage() {
+export default async function AdminCustomizationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
   const session = await requireAdmin();
+  const query = await searchParams;
   const [products, options] = await Promise.all([
     prisma.product.findMany({
       where: { archivedAt: null, customizable: true },
       orderBy: { name: "asc" },
     }),
     prisma.customizationOption.findMany({
-      include: { product: { select: { name: true } } },
+      include: { product: { select: { id: true, name: true, archivedAt: true } } },
       orderBy: [{ product: { name: "asc" } }, { sortOrder: "asc" }],
     }),
   ]);
@@ -19,82 +32,214 @@ export default async function AdminCustomizationPage() {
     <AdminShell
       session={session}
       title="Customization"
-      description="Define the choices customers can include with an order request."
+      description="Keep personal requests simple: enable a product, then offer only the choices customers genuinely need."
+      notice={query.notice}
     >
-      <form action={createCustomizationOption} className={`${adminCard} grid gap-4 md:grid-cols-2`}>
-        <h2 className="font-serif text-xl font-semibold md:col-span-2">Add an option</h2>
-        <label className="text-xs font-semibold">
-          Product
-          <select name="productId" required className={`${adminInput} mt-1`}>
-            <option value="">Choose product</option>
-            {products.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
+      {products.length ? (
+        <details className="admin-card admin-create-panel">
+          <summary>
+            <span>
+              <Palette aria-hidden="true" /> Add an option
+            </span>
+            <small>Text, long text, or a short choice list.</small>
+          </summary>
+          <CustomizationForm
+            action={createCustomizationOption}
+            products={products}
+            submitLabel="Add customization option"
+          />
+        </details>
+      ) : (
+        <div className="admin-storage-status is-missing">
+          <Settings2 aria-hidden="true" />
+          <div>
+            <strong>No customizable products are enabled</strong>
+            <p>
+              Open a product and enable customization before creating options.{" "}
+              <Link href="/admin/products">Manage products</Link>
+            </p>
+          </div>
+        </div>
+      )}
+      <section className="admin-list-section">
+        <div className="admin-section-heading">
+          <div>
+            <p>Customer choices</p>
+            <h2>{options.length} options</h2>
+          </div>
+        </div>
+        {options.length ? (
+          <div className="admin-manage-grid">
+            {options.map((option) => (
+              <details key={option.id} className="admin-card admin-edit-card">
+                <summary>
+                  <Palette aria-hidden="true" />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>
+                      {option.product.name} · {option.inputKind} · Sort {option.sortOrder}
+                    </small>
+                  </span>
+                  <em className={option.active ? "is-active" : "is-inactive"}>
+                    {option.active ? "Active" : "Inactive"}
+                  </em>
+                </summary>
+                <CustomizationForm
+                  action={updateCustomizationOption}
+                  products={products}
+                  option={{ ...option, priceAdjustment: Number(option.priceAdjustment) }}
+                  submitLabel="Save option"
+                />
+                <form action={deleteCustomizationOption} className="admin-danger-zone">
+                  <input type="hidden" name="id" value={option.id} />
+                  <ConfirmButton
+                    message={`Delete the ${option.label} option? Existing order snapshots will remain, but this cannot be undone.`}
+                    className="admin-danger-button"
+                  >
+                    <Trash2 aria-hidden="true" /> Delete option
+                  </ConfirmButton>
+                </form>
+              </details>
             ))}
-          </select>
-        </label>
-        <label className="text-xs font-semibold">
-          Label
-          <input
-            name="label"
-            required
-            className={`${adminInput} mt-1`}
-            placeholder="Flower color"
-          />
-        </label>
-        <label className="text-xs font-semibold">
-          Input type
-          <select name="inputKind" className={`${adminInput} mt-1`}>
-            <option value="text">Text</option>
-            <option value="select">Choice list</option>
-            <option value="textarea">Long text</option>
-          </select>
-        </label>
-        <label className="text-xs font-semibold">
-          Choices (comma-separated)
-          <input name="choices" className={`${adminInput} mt-1`} placeholder="Pink, White, Red" />
-        </label>
-        <label className="text-xs font-semibold">
-          Price adjustment
-          <input
-            name="priceAdjustment"
-            type="number"
-            step="0.01"
-            defaultValue="0"
-            className={`${adminInput} mt-1`}
-          />
-        </label>
-        <label className="flex items-center gap-2 pt-5 text-sm">
-          <input name="required" type="checkbox" />
-          Required
-        </label>
-        <button className={`${adminButton} md:w-fit`}>Add option</button>
-      </form>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {options.map((option) => (
-          <article key={option.id} className={adminCard}>
-            <div className="flex justify-between gap-3">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-brand-sage-700">
-                  {option.product.name}
-                </p>
-                <h2 className="mt-1 font-serif text-xl font-semibold">{option.label}</h2>
-                <p className="mt-1 text-xs text-brand-brown-500">
-                  {option.inputKind} · {option.required ? "Required" : "Optional"} ·{" "}
-                  {option.active ? "Active" : "Inactive"}
-                </p>
-              </div>
-              <form action={toggleCustomizationOption}>
-                <input type="hidden" name="id" value={option.id} />
-                <button className="rounded-lg border px-3 py-2 text-xs font-semibold">
-                  {option.active ? "Disable" : "Enable"}
-                </button>
-              </form>
-            </div>
-          </article>
-        ))}
-      </div>
+          </div>
+        ) : (
+          <div className="admin-empty">
+            <Palette aria-hidden="true" />
+            <h3>No customization options</h3>
+            <p>
+              Customizable products can still accept a conversational request without structured
+              options.
+            </p>
+          </div>
+        )}
+      </section>
     </AdminShell>
+  );
+}
+
+type ProductChoice = { id: string; name: string };
+type OptionValue = {
+  id: string;
+  productId: string;
+  key: string;
+  label: string;
+  description: string | null;
+  inputKind: string;
+  required: boolean;
+  choices: unknown;
+  priceAdjustment: number;
+  active: boolean;
+  sortOrder: number;
+};
+function CustomizationForm({
+  action,
+  products,
+  option,
+  submitLabel,
+}: {
+  action: (data: FormData) => Promise<void>;
+  products: ProductChoice[];
+  option?: OptionValue;
+  submitLabel: string;
+}) {
+  const choices = Array.isArray(option?.choices)
+    ? option.choices.filter((item): item is string => typeof item === "string").join(", ")
+    : "";
+  return (
+    <form action={action} className="admin-form-grid">
+      {option && <input type="hidden" name="id" value={option.id} />}
+      <label className="admin-field">
+        <span>Product *</span>
+        <select
+          name="productId"
+          required
+          defaultValue={option?.productId || ""}
+          className={adminInput}
+        >
+          <option value="">Choose product</option>
+          {products.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="admin-field">
+        <span>Label *</span>
+        <input
+          name="label"
+          required
+          minLength={2}
+          maxLength={100}
+          defaultValue={option?.label}
+          className={adminInput}
+          placeholder="Flower colour"
+        />
+      </label>
+      <label className="admin-field">
+        <span>Key</span>
+        <input name="key" pattern="[-a-z0-9]*" defaultValue={option?.key} className={adminInput} />
+      </label>
+      <label className="admin-field">
+        <span>Input type</span>
+        <select name="inputKind" defaultValue={option?.inputKind || "text"} className={adminInput}>
+          <option value="text">Short text</option>
+          <option value="select">Choice list</option>
+          <option value="textarea">Long text</option>
+        </select>
+      </label>
+      <label className="admin-field admin-field-wide">
+        <span>Description</span>
+        <textarea
+          name="description"
+          maxLength={500}
+          defaultValue={option?.description || ""}
+          className={adminTextarea}
+        />
+      </label>
+      <label className="admin-field admin-field-wide">
+        <span>Choices</span>
+        <input
+          name="choices"
+          defaultValue={choices}
+          className={adminInput}
+          placeholder="Blush, Cream, Botanical green"
+        />
+        <small>Comma-separated. Used only when input type is Choice list.</small>
+      </label>
+      <label className="admin-field">
+        <span>Price adjustment</span>
+        <input
+          name="priceAdjustment"
+          type="number"
+          step="0.01"
+          defaultValue={option?.priceAdjustment ?? 0}
+          className={adminInput}
+        />
+        <small>
+          {option?.priceAdjustment ? formatCurrency(option.priceAdjustment) : "No adjustment"}
+        </small>
+      </label>
+      <label className="admin-field">
+        <span>Sort order</span>
+        <input
+          name="sortOrder"
+          type="number"
+          min="-9999"
+          max="9999"
+          defaultValue={option?.sortOrder ?? 0}
+          className={adminInput}
+        />
+      </label>
+      <div className="admin-check-row admin-field-wide">
+        <label>
+          <input name="required" type="checkbox" defaultChecked={option?.required} /> Required
+        </label>
+        <label>
+          <input name="active" type="checkbox" defaultChecked={option?.active ?? true} /> Active
+        </label>
+      </div>
+      <AdminSubmitButton pendingLabel="Saving option…">{submitLabel}</AdminSubmitButton>
+    </form>
   );
 }

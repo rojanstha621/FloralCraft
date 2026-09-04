@@ -64,9 +64,9 @@ export default function ReviewsPage() {
   }
 
   return (
-    <div className="py-10 md:py-16">
+    <main className="public-editorial-page reviews-page">
       <Container size="xl">
-        <header className="mx-auto mb-12 max-w-2xl space-y-3 text-center">
+        <header className="editorial-page-header mx-auto mb-12 max-w-2xl space-y-3 text-center">
           <Badge variant="pink">Customer stories</Badge>
           <Heading as="h1" size="2xl">
             Love notes from our community
@@ -219,6 +219,6 @@ export default function ReviewsPage() {
           </aside>
         </div>
       </Container>
-    </div>
+    </main>
   );
 }

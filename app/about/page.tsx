@@ -7,8 +7,15 @@ import { Text } from "@/components/ui/text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Sparkles, Flower2, ArrowRight } from "lucide-react";
+import { InstagramStoryShowcase } from "@/components/instagram/instagram-story-showcase";
+import { getInstagramStoryShowcase } from "@/lib/data/instagram-stories";
+import { getPublicBusinessSettings } from "@/lib/data/business-settings";
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [stories, business] = await Promise.all([
+    getInstagramStoryShowcase(),
+    getPublicBusinessSettings(),
+  ]);
   return (
     <main className="public-editorial-page about-page">
       <Container size="xl">
@@ -118,6 +125,8 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+
+        <InstagramStoryShowcase stories={stories} instagramUrl={business.instagramUrl} />
 
         {/* CTA */}
         <section className="editorial-page-cta space-y-4 text-center">

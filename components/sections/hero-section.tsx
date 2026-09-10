@@ -103,7 +103,7 @@ export function HeroSection() {
             </span>
             <div className="hero-image-shell relative ml-auto aspect-[5/4] w-[94%] overflow-hidden border border-white/70 bg-brand-cream-200 shadow-[0_45px_100px_-35px_rgba(61,39,30,.42)] sm:aspect-[4/5] sm:w-[91%]">
               <Image
-                src="/images/petal-craft-hero-editorial.png"
+                src="https://pvjkjwrpqhzrhkuybeyk.supabase.co/storage/v1/object/public/product-images/site-assets/petal-craft-hero-editorial-5027737f47adb3f7.png"
                 alt="Preserved blush flowers displayed in a glass cloche and handmade paper frame"
                 fill
                 priority

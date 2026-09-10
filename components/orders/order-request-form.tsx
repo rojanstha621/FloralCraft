@@ -18,6 +18,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { createOrderWhatsAppMessage, createWhatsAppUrl } from "@/lib/config/business";
+import { createOrderTrackingPath } from "@/lib/orders/tracking-url";
 import { formatCurrency } from "@/lib/utils";
 import { useBusinessSettings } from "@/components/providers/business-provider";
 
@@ -48,6 +49,8 @@ type OrderProduct = {
 type FieldErrors = Record<string, string>;
 type Confirmation = {
   requestNumber: string;
+  trackingPath: string | null;
+  whatsappNotificationAccepted: boolean;
   productName: string;
   quantity: number;
   subtotal: number;
@@ -163,6 +166,8 @@ export function OrderRequestForm({
     if (email && !/^\S+@\S+\.\S+$/.test(email)) next.customerEmail = "Enter a valid email address.";
     if (channel === "EMAIL" && !email)
       next.customerEmail = "Email is needed when it is your preferred contact method.";
+    if (form.get("whatsappConsent") !== "on")
+      next.whatsappConsent = "Please agree to receive order updates through WhatsApp.";
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20)
       next.quantity = "Choose a quantity between 1 and 20.";
     if (!deliveryArea.trim()) next.deliveryArea = "Tell us the delivery area or pickup preference.";
@@ -216,6 +221,7 @@ export function OrderRequestForm({
           customerPhone: form.get("customerPhone"),
           customerEmail: form.get("customerEmail"),
           preferredChannel: form.get("preferredChannel"),
+          whatsappConsent: form.get("whatsappConsent") === "on",
           desiredDate,
           notes: composedNotes,
           productId,
@@ -227,6 +233,8 @@ export function OrderRequestForm({
       const data = (await response.json().catch(() => null)) as {
         message?: string;
         requestNumber?: string;
+        trackingToken?: string;
+        whatsappNotificationAccepted?: boolean;
         errors?: Record<string, string[]>;
       } | null;
       if (!response.ok) {
@@ -242,6 +250,11 @@ export function OrderRequestForm({
       }
       setConfirmation({
         requestNumber: data?.requestNumber || "",
+        trackingPath:
+          data?.requestNumber && data.trackingToken
+            ? createOrderTrackingPath(data.requestNumber, data.trackingToken)
+            : null,
+        whatsappNotificationAccepted: Boolean(data?.whatsappNotificationAccepted),
         productName: selected.name,
         quantity,
         subtotal,
@@ -290,6 +303,10 @@ export function OrderRequestForm({
         )}
         <div className="order-confirmation-summary">
           <div>
+            <span>Current status</span>
+            <strong>Request received</strong>
+          </div>
+          <div>
             <span>Piece</span>
             <strong>
               {confirmation.quantity} × {confirmation.productName}
@@ -312,6 +329,11 @@ export function OrderRequestForm({
             </div>
           )}
         </div>
+        <p className="order-confirmation-updates">
+          {confirmation.whatsappNotificationAccepted
+            ? "Your WhatsApp confirmation has been accepted for delivery. We’ll keep you updated there as your order progresses."
+            : "Your order is safely recorded. WhatsApp automation is not available just now, so please keep your secure tracking link and contact the studio if needed."}
+        </p>
         <div className="order-next-steps">
           <h3>What happens next</h3>
           <ol>
@@ -327,6 +349,11 @@ export function OrderRequestForm({
           </ol>
         </div>
         <div className="order-confirmation-actions">
+          {confirmation.trackingPath && (
+            <Link href={confirmation.trackingPath} className="order-confirmation-track">
+              Track your order <ArrowRight aria-hidden="true" />
+            </Link>
+          )}
           {business.whatsappOrderingEnabled && (
             <a
               href={createWhatsAppUrl(successWhatsApp, business.whatsappNumber)}
@@ -627,6 +654,28 @@ export function OrderRequestForm({
               <option value="EMAIL">Email</option>
             </select>
           </Field>
+          <div className="order-whatsapp-consent">
+            <label htmlFor="whatsappConsent">
+              <input
+                id="whatsappConsent"
+                name="whatsappConsent"
+                type="checkbox"
+                required
+                aria-invalid={Boolean(errors.whatsappConsent)}
+                aria-describedby={
+                  errors.whatsappConsent ? fieldErrorId("whatsappConsent") : undefined
+                }
+              />
+              <span>
+                Send my order confirmation and status updates to this number through WhatsApp.
+              </span>
+            </label>
+            {errors.whatsappConsent && (
+              <p id={fieldErrorId("whatsappConsent")} tabIndex={-1} role="alert">
+                {errors.whatsappConsent}
+              </p>
+            )}
+          </div>
           <Field label="A note for the studio" name="notes" optional wide>
             <textarea
               id="notes"

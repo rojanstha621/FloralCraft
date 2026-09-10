@@ -6,7 +6,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import prisma from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/guards";
+import { updateOrderStatus } from "@/lib/orders/update-status";
 import { deleteProductMedia, uploadProductMedia } from "@/lib/storage/cloud";
+import { attemptWhatsAppNotification } from "@/lib/whatsapp/cloud-api";
 
 const text = (value: FormDataEntryValue | null) => String(value || "").trim();
 const idSchema = z.string().min(1).max(100);
@@ -476,25 +478,85 @@ export async function deleteReview(formData: FormData) {
   redirect(noticeUrl("/admin/reviews", "Review deleted."));
 }
 
-export async function updateOrder(formData: FormData) {
+export async function moderateInstagramMention(formData: FormData) {
   await requireAdmin();
+  const id = idSchema.parse(text(formData.get("id")));
+  const status = z.enum(["APPROVED", "HIDDEN", "PENDING"]).parse(text(formData.get("status")));
+  const current = await prisma.instagramStoryMention.findUnique({
+    where: { id },
+    select: { expiresAt: true },
+  });
+  if (!current) throw new Error("Instagram Story mention was not found.");
+  if (status === "APPROVED" && current.expiresAt <= new Date()) {
+    redirect(noticeUrl("/admin/instagram", "That Story has expired and cannot be published."));
+  }
+  await prisma.instagramStoryMention.update({
+    where: { id },
+    data: { status, approvedAt: status === "APPROVED" ? new Date() : null },
+  });
+  revalidatePath("/admin/instagram");
+  revalidatePath("/about");
+}
+
+export async function deleteInstagramMention(formData: FormData) {
+  await requireAdmin();
+  await prisma.instagramStoryMention.delete({
+    where: { id: idSchema.parse(text(formData.get("id"))) },
+  });
+  revalidatePath("/admin/instagram");
+  revalidatePath("/about");
+  redirect(noticeUrl("/admin/instagram", "Instagram Story mention removed."));
+}
+
+export async function updateOrder(formData: FormData) {
+  const admin = await requireAdmin();
+  const id = idSchema.parse(text(formData.get("id")));
   const status = z
     .enum(["NEW", "CONTACTED", "CONFIRMED", "IN_PROGRESS", "COMPLETED", "CANCELLED"])
     .parse(text(formData.get("status")));
-  await prisma.orderRequest.update({
-    where: { id: idSchema.parse(text(formData.get("id"))) },
-    data: {
-      status,
-      adminNotes:
-        z
-          .string()
-          .max(2000)
-          .parse(text(formData.get("adminNotes"))) || null,
-      ...(status === "CONTACTED" ? { contactedAt: new Date() } : {}),
-    },
+  const adminNotes =
+    z
+      .string()
+      .max(2000)
+      .parse(text(formData.get("adminNotes"))) || null;
+  const result = await updateOrderStatus({
+    orderId: id,
+    status,
+    adminNotes,
+    adminId: admin.adminId,
   });
   revalidatePath("/admin/orders");
   revalidatePath("/admin");
+  const message = !result.changed
+    ? "Studio notes updated. No duplicate status notification was created."
+    : !result.notificationId
+      ? "Order status updated. This order has no WhatsApp notification consent."
+      : result.delivery && "accepted" in result.delivery && result.delivery.accepted
+        ? "Order updated and the WhatsApp notification was accepted."
+        : "Order updated. WhatsApp delivery failed and can be retried.";
+  redirect(noticeUrl("/admin/orders", message));
+}
+
+export async function retryOrderNotification(formData: FormData) {
+  await requireAdmin();
+  const notificationId = idSchema.parse(text(formData.get("notificationId")));
+  const notification = await prisma.orderNotification.findUnique({
+    where: { id: notificationId },
+    select: { id: true, deliveryStatus: true },
+  });
+  if (!notification || !["FAILED", "PENDING"].includes(notification.deliveryStatus)) {
+    redirect(noticeUrl("/admin/orders", "That notification cannot be retried."));
+  }
+  const result = await attemptWhatsAppNotification(notification.id);
+  revalidatePath("/admin/orders");
+  redirect(
+    noticeUrl(
+      "/admin/orders",
+      result.attempted && "accepted" in result && result.accepted
+        ? "WhatsApp accepted the retry."
+        : "WhatsApp delivery still failed. Check configuration and template approval."
+    )
+  );
 }
 
 export async function updateSettings(formData: FormData) {

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Boxes,
   ClipboardList,
+  Instagram,
   LayoutDashboard,
   MessageSquareText,
   Palette,
@@ -21,6 +22,7 @@ const navigation = [
   ["Product types", "/admin/product-types", Shapes],
   ["Customization", "/admin/customization", Palette],
   ["Reviews", "/admin/reviews", MessageSquareText],
+  ["Instagram", "/admin/instagram", Instagram],
   ["Orders", "/admin/orders", ClipboardList],
   ["Settings", "/admin/settings", Settings],
 ] as const;

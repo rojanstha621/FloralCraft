@@ -27,16 +27,49 @@ enum OrderRequestStatus {
   CANCELLED
 }
 
+enum OrderNotificationEvent {
+  ORDER_CREATED
+  ORDER_STATUS_CHANGED
+}
+
+enum OrderNotificationDeliveryStatus {
+  PENDING
+  PROCESSING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  CANCELLED
+}
+
+enum OrderNotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+enum InstagramMentionStatus {
+  PENDING
+  APPROVED
+  HIDDEN
+}
+
+enum InstagramMediaType {
+  IMAGE
+  VIDEO
+}
+
 model AdminUser {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String
-  passwordHash String
-  role         AdminRole @default(ADMIN)
-  active       Boolean   @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id            String               @id @default(cuid())
+  email         String               @unique
+  name          String
+  passwordHash  String
+  role          AdminRole            @default(ADMIN)
+  active        Boolean              @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  statusChanges OrderStatusHistory[]
 
   @@index([active])
 }
@@ -162,23 +195,77 @@ model Review {
 }
 
 model OrderRequest {
-  id               String             @id @default(cuid())
-  requestNumber    String             @unique
-  customerName     String
-  customerPhone    String
-  customerEmail    String?
-  preferredChannel String
-  status           OrderRequestStatus @default(NEW)
-  desiredDate      DateTime?
-  notes            String?
-  adminNotes       String?
-  contactedAt      DateTime?
-  items            OrderRequestItem[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                 String               @id @default(cuid())
+  requestNumber      String               @unique
+  idempotencyKeyHash String?              @unique @db.Char(64)
+  trackingTokenHash  String?              @unique @db.Char(64)
+  customerName       String
+  customerPhone      String
+  customerEmail      String?
+  preferredChannel   String
+  whatsappOptInAt    DateTime?
+  status             OrderRequestStatus   @default(NEW)
+  desiredDate        DateTime?
+  notes              String?
+  adminNotes         String?
+  contactedAt        DateTime?
+  items              OrderRequestItem[]
+  statusHistory      OrderStatusHistory[]
+  notifications      OrderNotification[]
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
   @@index([status, createdAt])
   @@index([customerPhone])
+}
+
+model OrderStatusHistory {
+  id               String              @id @default(cuid())
+  orderRequestId   String
+  orderRequest     OrderRequest        @relation(fields: [orderRequestId], references: [id], onDelete: Cascade)
+  previousStatus   OrderRequestStatus?
+  newStatus        OrderRequestStatus
+  changedByAdminId String?
+  changedByAdmin   AdminUser?          @relation(fields: [changedByAdminId], references: [id], onDelete: SetNull)
+  notifications    OrderNotification[]
+  createdAt        DateTime            @default(now())
+
+  @@index([orderRequestId, createdAt])
+  @@index([changedByAdminId])
+  @@index([newStatus, createdAt])
+}
+
+model OrderNotification {
+  id                String                          @id @default(cuid())
+  orderRequestId    String
+  orderRequest      OrderRequest                    @relation(fields: [orderRequestId], references: [id], onDelete: Cascade)
+  statusHistoryId   String?
+  statusHistory     OrderStatusHistory?             @relation(fields: [statusHistoryId], references: [id], onDelete: SetNull)
+  channel           OrderNotificationChannel
+  eventType         OrderNotificationEvent
+  orderStatus       OrderRequestStatus?
+  recipient         String?
+  templateName      String?
+  templateLanguage  String?
+  deliveryStatus    OrderNotificationDeliveryStatus @default(PENDING)
+  deduplicationKey  String                          @unique
+  providerMessageId String?                         @unique
+  attemptCount      Int                             @default(0)
+  availableAt       DateTime                        @default(now())
+  processedAt       DateTime?
+  lastAttemptAt     DateTime?
+  sentAt            DateTime?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  failedAt          DateTime?
+  lastError         String?
+  createdAt         DateTime                        @default(now())
+  updatedAt         DateTime                        @updatedAt
+
+  @@unique([statusHistoryId, channel])
+  @@index([orderRequestId, createdAt])
+  @@index([deliveryStatus, availableAt])
+  @@index([eventType, createdAt])
 }
 
 model OrderRequestItem {
@@ -215,4 +302,22 @@ model BusinessSettings {
   homepage                Json?
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
+}
+
+model InstagramStoryMention {
+  id               String                 @id @default(cuid())
+  webhookMessageId String                 @unique
+  senderScopedId   String
+  authorUsername   String?
+  mediaType        InstagramMediaType
+  mediaUrl         String
+  status           InstagramMentionStatus @default(PENDING)
+  storyCreatedAt   DateTime
+  expiresAt        DateTime
+  approvedAt       DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  @@index([status, expiresAt])
+  @@index([createdAt])
 }

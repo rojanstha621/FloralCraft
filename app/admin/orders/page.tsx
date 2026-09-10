@@ -6,27 +6,29 @@ import prisma from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/guards";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { AdminShell, adminInput, adminTextarea } from "@/components/admin/admin-shell";
-import { AdminSubmitButton } from "@/components/admin/form-controls";
-import { updateOrder } from "../actions";
+import { ConfirmButton } from "@/components/admin/form-controls";
+import { ORDER_STATUSES, ORDER_STATUS_LABELS, nextOrderStatuses } from "@/lib/orders/status";
+import { whatsappCloudApiStatus } from "@/lib/whatsapp/cloud-api";
+import { retryOrderNotification, updateOrder } from "../actions";
 
-const statuses = [
-  "NEW",
-  "CONTACTED",
-  "CONFIRMED",
-  "IN_PROGRESS",
-  "COMPLETED",
-  "CANCELLED",
-] as const;
 const statusLabel = (status: string) =>
   status
     .toLowerCase()
     .replaceAll("_", " ")
     .replace(/^\w/, (letter) => letter.toUpperCase());
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
   const session = await requireAdmin();
+  const { notice } = await searchParams;
+  const whatsapp = whatsappCloudApiStatus();
   const orders = await prisma.orderRequest.findMany({
     include: {
+      statusHistory: { orderBy: { createdAt: "desc" } },
+      notifications: { orderBy: { createdAt: "desc" } },
       items: {
         include: {
           product: {
@@ -46,9 +48,25 @@ export default async function AdminOrdersPage() {
       session={session}
       title="Order requests"
       description="Move every request from first contact to completion while keeping customer and product context together."
+      notice={notice}
     >
+      <div className={`admin-storage-status ${whatsapp.configured ? "is-ready" : "is-missing"}`}>
+        <MessageCircle aria-hidden="true" />
+        <div>
+          <strong>
+            {whatsapp.configured
+              ? "WhatsApp Cloud API connected"
+              : "WhatsApp automation needs configuration"}
+          </strong>
+          <p>
+            {whatsapp.configured
+              ? "Status updates use controlled, approved Meta templates."
+              : "Orders remain authoritative; notification attempts are recorded as failed until Cloud API credentials and templates are configured."}
+          </p>
+        </div>
+      </div>
       <div className="admin-order-counts">
-        {statuses.map((status) => (
+        {ORDER_STATUSES.map((status) => (
           <span key={status}>
             <strong>{orders.filter((order) => order.status === status).length}</strong>
             {statusLabel(status)}
@@ -192,12 +210,70 @@ export default async function AdminOrdersPage() {
                     </div>
                   )}
                 </div>
+                <div className="admin-order-audit">
+                  <section>
+                    <h3>Status history</h3>
+                    {order.statusHistory.length ? (
+                      <ol>
+                        {order.statusHistory.map((entry) => (
+                          <li key={entry.id}>
+                            <strong>{ORDER_STATUS_LABELS[entry.newStatus]}</strong>
+                            <span>{formatDate(entry.createdAt)}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p>No recorded history for this legacy order.</p>
+                    )}
+                  </section>
+                  <section>
+                    <h3>WhatsApp notifications</h3>
+                    {order.notifications.length ? (
+                      <ol>
+                        {order.notifications.map((notification) => (
+                          <li key={notification.id}>
+                            <div>
+                              <strong>
+                                {notification.orderStatus
+                                  ? ORDER_STATUS_LABELS[notification.orderStatus]
+                                  : "Order update"}
+                              </strong>
+                              <span>
+                                {statusLabel(notification.deliveryStatus)} ·{" "}
+                                {formatDate(notification.createdAt)}
+                              </span>
+                              {notification.lastError && <small>{notification.lastError}</small>}
+                            </div>
+                            {["FAILED", "PENDING"].includes(notification.deliveryStatus) &&
+                              notification.attemptCount < 5 && (
+                                <form action={retryOrderNotification}>
+                                  <input
+                                    type="hidden"
+                                    name="notificationId"
+                                    value={notification.id}
+                                  />
+                                  <ConfirmButton
+                                    message="Retry this controlled WhatsApp template now?"
+                                    className="admin-secondary-button"
+                                  >
+                                    Retry
+                                  </ConfirmButton>
+                                </form>
+                              )}
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p>No WhatsApp notifications recorded.</p>
+                    )}
+                  </section>
+                </div>
                 <form action={updateOrder} className="admin-order-update">
                   <input type="hidden" name="id" value={order.id} />
                   <label>
                     <span>Request status</span>
                     <select name="status" defaultValue={order.status} className={adminInput}>
-                      {statuses.map((status) => (
+                      {nextOrderStatuses(order.status).map((status) => (
                         <option key={status} value={status}>
                           {statusLabel(status)}
                         </option>
@@ -214,9 +290,16 @@ export default async function AdminOrdersPage() {
                       className={adminTextarea}
                     />
                   </label>
-                  <AdminSubmitButton pendingLabel="Updating request…">
+                  <p className="admin-order-notification-note">
+                    A status change queues one server-controlled WhatsApp template. Saving the same
+                    status only updates private notes.
+                  </p>
+                  <ConfirmButton
+                    message={`Current status: ${ORDER_STATUS_LABELS[order.status]}. Continue with this update? A WhatsApp notification will be attempted only if the status changes.`}
+                    className="admin-primary-button"
+                  >
                     Update request
-                  </AdminSubmitButton>
+                  </ConfirmButton>
                 </form>
               </article>
             );

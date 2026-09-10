@@ -178,7 +178,12 @@ function CustomizationForm({
       </label>
       <label className="admin-field">
         <span>Key</span>
-        <input name="key" pattern="[-a-z0-9]*" defaultValue={option?.key} className={adminInput} />
+        <input
+          name="key"
+          pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+          defaultValue={option?.key}
+          className={adminInput}
+        />
       </label>
       <label className="admin-field">
         <span>Input type</span>

@@ -110,7 +110,12 @@ function ProductTypeForm({
       </label>
       <label className="admin-field">
         <span>Slug</span>
-        <input name="slug" pattern="[-a-z0-9]*" defaultValue={item?.slug} className={adminInput} />
+        <input
+          name="slug"
+          pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
+          defaultValue={item?.slug}
+          className={adminInput}
+        />
       </label>
       <label className="admin-field admin-field-wide">
         <span>Description</span>

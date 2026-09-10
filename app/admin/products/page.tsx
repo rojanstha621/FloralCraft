@@ -83,7 +83,7 @@ export default async function AdminProductsPage({
             <AdminField label="Slug" help="Optional. Generated from the name if left blank.">
               <input
                 name="slug"
-                pattern="[a-z0-9-]*"
+                pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
                 className={adminInput}
                 placeholder="garden-blush-bouquet"
               />

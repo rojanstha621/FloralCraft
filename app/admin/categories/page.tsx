@@ -111,7 +111,7 @@ function CategoryForm({
         <span>Slug</span>
         <input
           name="slug"
-          pattern="[-a-z0-9]*"
+          pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
           defaultValue={category?.slug}
           className={adminInput}
         />

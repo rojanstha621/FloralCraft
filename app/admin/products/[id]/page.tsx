@@ -91,7 +91,7 @@ export default async function EditProductPage({
             <input
               name="slug"
               defaultValue={product.slug}
-              pattern="[a-z0-9-]+"
+              pattern="[a-z0-9]+(?:-[a-z0-9]+)*"
               required
               className={adminInput}
             />

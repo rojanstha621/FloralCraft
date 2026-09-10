@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { Sparkles, Heart } from "lucide-react";
+import { mediaUrl } from "@/lib/config/media";
 
 export function FallbackHero() {
   return (
@@ -15,7 +16,7 @@ export function FallbackHero() {
         {/* Center Keepsake Photograph Card */}
         <div className="relative mt-2 h-44 w-full overflow-hidden rounded-xl border border-brand-beige-300 bg-brand-cream-100 shadow-subtle">
           <Image
-            src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=800&auto=format&fit=crop"
+            src={mediaUrl("editorial/about-studio.jpg")}
             alt="Handcrafted Floral Keepsake Frame"
             fill
             sizes="(max-width: 768px) 100vw, 400px"

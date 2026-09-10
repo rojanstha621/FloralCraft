@@ -6,48 +6,43 @@ import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight } from "lucide-react";
+import { mediaUrl } from "@/lib/config/media";
 
 export const OCCASIONS = [
   {
     title: "Birthdays",
     subtitle: "Vibrant botanical memories for their special day",
-    imageUrl:
-      "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=800&auto=format&fit=crop",
+    imageUrl: mediaUrl("occasions/birthdays.jpg"),
     href: "/collections",
   },
   {
     title: "Anniversaries",
     subtitle: "Everlasting preserved florals that celebrate your love story",
-    imageUrl:
-      "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop",
+    imageUrl: mediaUrl("occasions/anniversaries.jpg"),
     href: "/collections",
   },
   {
     title: "Couples & Engagements",
     subtitle: "Custom photo frames with wedding vows and dates",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
+    imageUrl: mediaUrl("occasions/couples-engagements.jpg"),
     href: "/collections",
   },
   {
     title: "Dear Parents",
     subtitle: "Warm expressions of gratitude for Mom & Dad",
-    imageUrl:
-      "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=800&auto=format&fit=crop",
+    imageUrl: mediaUrl("occasions/dear-parents.jpg"),
     href: "/collections",
   },
   {
     title: "Teachers & Mentors",
     subtitle: "Thoughtful floral glass domes and gratitude art",
-    imageUrl:
-      "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=800&auto=format&fit=crop",
+    imageUrl: mediaUrl("occasions/teachers-mentors.jpg"),
     href: "/collections",
   },
   {
     title: "Special Moments",
     subtitle: "Farewells, graduations, and just-because surprises",
-    imageUrl:
-      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop",
+    imageUrl: mediaUrl("occasions/special-moments.jpg"),
     href: "/collections",
   },
 ];

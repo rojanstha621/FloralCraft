@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
       "object-src 'none'",
       `script-src 'self' 'unsafe-inline'${production ? "" : " 'unsafe-eval'"}`,
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://*.supabase.co https://*.cdninstagram.com https://*.fbcdn.net",
+      "img-src 'self' data: blob: https://res.cloudinary.com https://*.supabase.co https://*.cdninstagram.com https://*.fbcdn.net",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co",
       "worker-src 'self' blob:",
@@ -53,10 +53,6 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
       {
         protocol: "https",
         hostname: "res.cloudinary.com",

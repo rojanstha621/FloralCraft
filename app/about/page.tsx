@@ -10,6 +10,7 @@ import { Heart, Sparkles, Flower2, ArrowRight } from "lucide-react";
 import { InstagramStoryShowcase } from "@/components/instagram/instagram-story-showcase";
 import { getInstagramStoryShowcase } from "@/lib/data/instagram-stories";
 import { getPublicBusinessSettings } from "@/lib/data/business-settings";
+import { mediaUrl } from "@/lib/config/media";
 
 export default async function AboutPage() {
   const [stories, business] = await Promise.all([
@@ -36,7 +37,7 @@ export default async function AboutPage() {
         <section className="about-story mb-20 grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
           <div className="relative aspect-[4/5] w-full overflow-hidden rounded-4xl border border-brand-beige-300 bg-brand-cream-100 shadow-card lg:col-span-5">
             <Image
-              src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=800&auto=format&fit=crop"
+              src={mediaUrl("editorial/about-studio.jpg")}
               alt="Artisan arranging preserved flowers in Kathmandu"
               fill
               className="object-cover"

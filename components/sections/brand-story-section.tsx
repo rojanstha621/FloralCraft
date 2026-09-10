@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { Badge } from "@/components/ui/badge";
+import { mediaUrl } from "@/lib/config/media";
 
 export function BrandStorySection() {
   return (
@@ -18,7 +19,7 @@ export function BrandStorySection() {
             data-scroll-image
           >
             <Image
-              src="https://images.unsplash.com/photo-1709294728704-c2de23b6dccf?auto=format&fit=crop&w=1200&q=85"
+              src={mediaUrl("editorial/brand-story.jpg")}
               alt="Hands carefully composing flowers at a wooden worktable"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"

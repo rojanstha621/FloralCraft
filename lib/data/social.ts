@@ -1,4 +1,5 @@
 import { BUSINESS } from "@/lib/config/business";
+import { mediaUrl } from "@/lib/config/media";
 
 export type SocialContentType = "post" | "reel" | "story-link";
 
@@ -19,8 +20,7 @@ export const SOCIAL_CONTENT: SocialContentItem[] = [
     type: "story-link",
     title: "In the studio",
     caption: "See how each keepsake comes together by hand.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=crop",
+    imageUrl: mediaUrl("social/studio.jpg"),
     href: BUSINESS.instagramUrl,
   },
   {
@@ -28,8 +28,7 @@ export const SOCIAL_CONTENT: SocialContentItem[] = [
     type: "post",
     title: "Petal details",
     caption: "A closer look at preserved textures and thoughtful finishing.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?q=80&w=600&auto=format&fit=crop",
+    imageUrl: mediaUrl("social/details.jpg"),
     href: BUSINESS.instagramUrl,
   },
   {
@@ -37,8 +36,7 @@ export const SOCIAL_CONTENT: SocialContentItem[] = [
     type: "reel",
     title: "Packing an order",
     caption: "From our Kathmandu studio, wrapped and ready to gift.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?q=80&w=600&auto=format&fit=crop",
+    imageUrl: mediaUrl("social/packing.jpg"),
     href: BUSINESS.instagramUrl,
   },
   {
@@ -46,8 +44,7 @@ export const SOCIAL_CONTENT: SocialContentItem[] = [
     type: "post",
     title: "Recent work",
     caption: "New botanical compositions and keepsakes from our latest drop.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=600&auto=format&fit=crop",
+    imageUrl: mediaUrl("social/new-work.jpg"),
     href: BUSINESS.instagramUrl,
   },
 ];

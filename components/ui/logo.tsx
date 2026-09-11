@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -6,12 +7,14 @@ export interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: "full" | "circular" | "monogram" | "horizontal" | "icon";
   size?: "sm" | "md" | "lg" | "xl";
   asLink?: boolean;
+  imageUrl?: string;
 }
 
 export function Logo({
   variant = "horizontal",
   size = "md",
   asLink = true,
+  imageUrl,
   className,
   ...props
 }: LogoProps) {
@@ -112,9 +115,21 @@ export function Logo({
 
       {variant === "horizontal" && (
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-sage/40 bg-brand-cream/90 text-brand-brown shadow-subtle">
-            <span className="font-serif text-sm font-semibold tracking-wider">PC</span>
-          </div>
+          {imageUrl ? (
+            <span className="relative block h-11 w-12 shrink-0 overflow-hidden">
+              <Image
+                src={imageUrl}
+                alt="Petal Craft Florals logo"
+                fill
+                sizes="48px"
+                className="object-contain"
+              />
+            </span>
+          ) : (
+            <div className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-sage/40 bg-brand-cream/90 text-brand-brown shadow-subtle">
+              <span className="font-serif text-sm font-semibold tracking-wider">PC</span>
+            </div>
+          )}
           <div className="flex flex-col">
             <span className="font-serif text-lg font-semibold leading-tight tracking-wide text-brand-brown">
               Petal Craft

@@ -17,7 +17,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-5">
           {/* Brand Column */}
           <div className="space-y-4 lg:col-span-2">
-            <Logo variant="horizontal" size="md" />
+            <Logo variant="horizontal" size="md" imageUrl={business.logoUrl} />
             <Text size="sm" variant="muted" className="max-w-sm">
               Handcrafted floral keepsakes designed to preserve memories, celebrate love, and convey
               emotions. Made by hand with care in Kathmandu, Nepal.

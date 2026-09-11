@@ -25,6 +25,7 @@ export const getPublicBusinessSettings = unstable_cache(
     if (!settings)
       return {
         ...BUSINESS,
+        logoUrl: "",
         address: BUSINESS.location,
         openingHours: "",
         facebookUrl: "",
@@ -33,6 +34,7 @@ export const getPublicBusinessSettings = unstable_cache(
         whatsappOrderingEnabled: true,
       };
     return {
+      logoUrl: readString(settings.homepage, "logoUrl"),
       name: settings.businessName || BUSINESS.name,
       tagline: settings.tagline || BUSINESS.tagline,
       positioning: BUSINESS.positioning,

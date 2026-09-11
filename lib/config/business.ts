@@ -11,6 +11,7 @@ export const BUSINESS = {
 } as const;
 
 export type PublicBusinessSettings = {
+  logoUrl: string;
   name: string;
   tagline: string;
   positioning: string;

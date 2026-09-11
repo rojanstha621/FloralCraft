@@ -1,4 +1,5 @@
-import { Cloud, Globe2, MessageCircle, Store } from "lucide-react";
+import Image from "next/image";
+import { Cloud, Globe2, ImageIcon, MessageCircle, Store } from "lucide-react";
 import prisma from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/guards";
 import { getMediaStorageStatus } from "@/lib/storage/cloud";
@@ -28,6 +29,7 @@ export default async function AdminSettingsPage({
   const query = await searchParams;
   const settings = await prisma.businessSettings.findUnique({ where: { id: "default" } });
   const storage = getMediaStorageStatus();
+  const logoUrl = objectValue(settings?.homepage, "logoUrl");
   return (
     <AdminShell
       session={session}
@@ -108,6 +110,37 @@ export default async function AdminSettingsPage({
                 className={adminTextarea}
               />
             </Field>
+          </div>
+          <div className="admin-logo-manager">
+            <div className="admin-logo-preview">
+              {logoUrl ? (
+                <Image src={logoUrl} alt="Current Petal Craft logo" fill sizes="160px" />
+              ) : (
+                <div>
+                  <ImageIcon aria-hidden="true" />
+                  <span>No logo uploaded</span>
+                </div>
+              )}
+            </div>
+            <div className="admin-logo-fields">
+              <strong>Brand logo</strong>
+              <p>
+                Upload a transparent PNG, JPEG, or WebP. A wide or square image works best; maximum
+                file size is 4 MB.
+              </p>
+              <input
+                name="logo"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className={adminInput}
+              />
+              {logoUrl && (
+                <label className="admin-logo-remove">
+                  <input name="removeLogo" type="checkbox" /> Remove the current logo and use the PC
+                  monogram
+                </label>
+              )}
+            </div>
           </div>
         </section>
         <section className="admin-card">

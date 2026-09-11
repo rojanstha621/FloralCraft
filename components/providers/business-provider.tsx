@@ -5,6 +5,7 @@ import { BUSINESS, type PublicBusinessSettings } from "@/lib/config/business";
 
 const fallback: PublicBusinessSettings = {
   ...BUSINESS,
+  logoUrl: "",
   address: BUSINESS.location,
   openingHours: "",
   facebookUrl: "",

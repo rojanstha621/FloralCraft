@@ -4712,6 +4712,61 @@
   border-top: 1px solid #e5ddd2;
   padding-top: 1.3rem;
 }
+.admin-logo-manager {
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: center;
+  margin-top: 1.3rem;
+  border-top: 1px solid #e5ddd2;
+  padding-top: 1.3rem;
+}
+.admin-logo-preview {
+  position: relative;
+  display: grid;
+  min-height: 7rem;
+  place-items: center;
+  overflow: hidden;
+  border: 1px dashed #cec2b4;
+  border-radius: 0.75rem;
+  background: #faf6ef;
+}
+.admin-logo-preview img {
+  padding: 0.8rem;
+  object-fit: contain;
+}
+.admin-logo-preview > div {
+  display: grid;
+  place-items: center;
+  gap: 0.45rem;
+  color: #887a72;
+  font-size: 0.63rem;
+}
+.admin-logo-preview svg {
+  width: 1.25rem;
+}
+.admin-logo-fields {
+  display: grid;
+  gap: 0.55rem;
+}
+.admin-logo-fields strong {
+  color: #44322b;
+  font-size: 0.74rem;
+}
+.admin-logo-fields p,
+.admin-logo-remove {
+  color: #887a72;
+  font-size: 0.64rem;
+  line-height: 1.55;
+}
+.admin-logo-remove {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.admin-logo-remove input {
+  accent-color: #657352;
+}
 .admin-settings-save {
   position: sticky;
   z-index: 10;
@@ -5014,6 +5069,12 @@
   .admin-manage-grid,
   .admin-order-context {
     grid-template-columns: 1fr;
+  }
+  .admin-logo-manager {
+    grid-template-columns: 1fr;
+  }
+  .admin-logo-preview {
+    min-height: 6rem;
   }
   .admin-field-wide,
   .admin-order-note {

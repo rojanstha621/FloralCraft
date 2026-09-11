@@ -74,7 +74,7 @@ export function Navbar() {
         >
           {/* Brand Logo */}
           <div className="flex items-center">
-            <Logo variant="horizontal" size="md" />
+            <Logo variant="horizontal" size="md" imageUrl={business.logoUrl} />
           </div>
 
           {/* Desktop Navigation Links */}

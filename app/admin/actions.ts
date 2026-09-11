@@ -7,7 +7,12 @@ import { z } from "zod";
 import prisma from "@/lib/db/prisma";
 import { requireAdmin } from "@/lib/auth/guards";
 import { updateOrderStatus } from "@/lib/orders/update-status";
-import { deleteProductMedia, uploadProductMedia } from "@/lib/storage/cloud";
+import {
+  deleteBrandLogo,
+  deleteProductMedia,
+  uploadBrandLogo,
+  uploadProductMedia,
+} from "@/lib/storage/cloud";
 import { attemptWhatsAppNotification } from "@/lib/whatsapp/cloud-api";
 
 const text = (value: FormDataEntryValue | null) => String(value || "").trim();
@@ -561,6 +566,19 @@ export async function retryOrderNotification(formData: FormData) {
 
 export async function updateSettings(formData: FormData) {
   await requireAdmin();
+  const currentSettings = await prisma.businessSettings.findUnique({
+    where: { id: "default" },
+    select: { homepage: true },
+  });
+  const homepage =
+    currentSettings?.homepage &&
+    typeof currentSettings.homepage === "object" &&
+    !Array.isArray(currentSettings.homepage)
+      ? { ...(currentSettings.homepage as Prisma.JsonObject) }
+      : {};
+  const currentLogoUrl = typeof homepage.logoUrl === "string" ? homepage.logoUrl : "";
+  const currentLogoKey = typeof homepage.logoKey === "string" ? homepage.logoKey : "";
+  const removeLogo = formData.get("removeLogo") === "on";
   const parsed = z
     .object({
       businessName: z.string().min(2).max(120),
@@ -594,6 +612,9 @@ export async function updateSettings(formData: FormData) {
       otherSocial: text(formData.get("otherSocial")),
       whatsappMessageTemplate: text(formData.get("whatsappMessageTemplate")),
     });
+  const logoFile = formData.get("logo");
+  const uploadedLogo =
+    logoFile instanceof File && logoFile.size ? await uploadBrandLogo(logoFile) : null;
   const data = {
     businessName: parsed.businessName,
     tagline: parsed.tagline || null,
@@ -618,12 +639,26 @@ export async function updateSettings(formData: FormData) {
       whatsapp: { enabled: formData.get("whatsappOrdering") === "on", label: "Order on WhatsApp" },
     },
     whatsappMessageTemplate: parsed.whatsappMessageTemplate || null,
+    homepage: {
+      ...homepage,
+      logoUrl: uploadedLogo?.url || (removeLogo ? "" : currentLogoUrl),
+      logoKey: uploadedLogo?.key || (removeLogo ? "" : currentLogoKey),
+    },
   };
-  await prisma.businessSettings.upsert({
-    where: { id: "default" },
-    update: data,
-    create: { id: "default", ...data },
-  });
+  try {
+    await prisma.businessSettings.upsert({
+      where: { id: "default" },
+      update: data,
+      create: { id: "default", ...data },
+    });
+  } catch (error) {
+    if (uploadedLogo) await deleteBrandLogo(uploadedLogo.key).catch(() => undefined);
+    throw error;
+  }
+  const obsoleteLogoKey = uploadedLogo || removeLogo ? currentLogoKey : "";
+  if (obsoleteLogoKey && obsoleteLogoKey !== uploadedLogo?.key) {
+    await deleteBrandLogo(obsoleteLogoKey).catch(() => undefined);
+  }
   revalidateTag("business-settings");
   revalidatePath("/admin/settings");
   revalidatePath("/");
